@@ -110,14 +110,26 @@
     </style>
     <div class="row">
         <h1>Appointments</h1>
-        <div class="form-group row" style="padding-top:15px;">
-                                <label for="inputEmail3" class="col-sm-2 col-form-label">Select Area</label>
-                                <div class="col-sm-10">
-                                    <select class="form-control" name="Provider">
-                                        <option value="">--Select an Area--</option>
-                                    </select>
-                                </div>
-                            </div>
+          <div class="col-lg-12 property-section">
+        <table id="property" title="Show / Hide Resource" class="table">
+            <tbody>
+                <tr>
+                    <td>
+                    <label> <input id="personal" checked class="e-resource-calendar e-personal" value="1" type="checkbox" onchange="onChange(this)" /> Area 1</label>
+                    </td>
+                    <td>
+                        <label><input id="company" checked class="e-resource-calendar e-company" value="2" type="checkbox"  onchange="onChange(this)" />Area 2</label>
+                    </td>
+                    <td>
+<label>                        <input id="birthdays"  checked class="e-resource-calendar e-birthday" value="3" type="checkbox" onchange="onChange(this)" />Area 3</label>
+                    </td>
+                    <td>
+       <label>                 <input id="holidays"  checked class="e-resource-calendar e-holiday" value="4" type="checkbox" onchange="onChange(this)" />Area 4</label>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
         <br />
         <div id="Schedule"></div>
 
@@ -237,6 +249,13 @@
         </div>
     </div>
         <script>
+            let calendarCollections = [
+                { OwnerText: 'Area 1', Id: 1, CalendarColor: '#c43081' },
+                { OwnerText: 'Area 2', Id: 2, CalendarColor: '#ff7f50' },
+                { OwnerText: 'Area 3', Id: 3, CalendarColor: '#AF27CD' },
+                { OwnerText: 'Area 4', Id: 4, CalendarColor: '#808000' }
+            ];
+
             // initialize DatePicker component
             var datepicker = new ej.calendars.DateTimePicker();
 
@@ -253,10 +272,32 @@
                 height: '550px',
                 selectedDate: new Date(2018, 1, 15),
                 views: ['Day', 'Week', 'TimelineWeek', 'Month', 'Agenda'],
-                eventSettings: { dataSource: data }
+                eventSettings: { dataSource: data },
+                group: {
+                    resources: ['Owners']
+                },
+                resources: [{
+                    field: 'OwnerId', title: 'Owner',
+                    name: 'Owners', allowMultiple: true,
+                    dataSource: calendarCollections,
+                    textField: 'OwnerText', idField: 'Id', colorField: 'OwnerColor'
+                }],
             });
             scheduleObj.appendTo('#Schedule');
 
+
+            function onChange(args) {
+                let checked = $(args).is(':checked')
+                var value = parseInt($(args).val());
+                var col = calendarCollections[value - 1];
+                if (checked) {
+                    scheduleObj.addResource(col, 'Owners', value - 1);
+                } else {
+                    console.log(value);
+                    scheduleObj.removeResource(value, 'Owners');
+                    //scheduleObj.removeResource(4, 'Owners')
+                }
+            }
             scheduleObj.actionBegin = function actionBegin(e) {
                 console.log('action begin', e);
                 if (e.requestType === "eventRemove") {

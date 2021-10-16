@@ -1,15 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Calender.Data;
 
 namespace Calender.Controllers
 {
     public class AppointmentController : ApiController
     {
+        [HttpGet]
+        public async Task<object> GetAppointments()
+        {
+            Context context = new Context();
+            
+            var all = await context.Appointments.Select(s => new { Subject = s.Notes, s.Id, StartTime = s.AppointmentDate, EndTime = DbFunctions.AddMinutes(s.AppointmentDate, s.Duration), ServiceCenterId = s.ServiceCenterId }).ToListAsync();
+            return all;
+        }
+
         [HttpPost]
         public async Task<bool> SaveAppointment(string e)
         {

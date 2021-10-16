@@ -2,7 +2,7 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        * Profile container */
+        /* Profile container */
 .profile {
   margin: 20px 0;
 }
@@ -111,24 +111,10 @@
     <div class="row">
         <h1>Appointments</h1>
           <div class="col-lg-12 property-section">
-        <table id="property" title="Show / Hide Resource" class="table">
-            <tbody>
-                <tr>
-                    <td>
-                    <label> <input id="personal" checked class="e-resource-calendar e-personal" value="1" type="checkbox" onchange="onChange(this)" /> Area 1</label>
-                    </td>
-                    <td>
-                        <label><input id="company" checked class="e-resource-calendar e-company" value="2" type="checkbox"  onchange="onChange(this)" />Area 2</label>
-                    </td>
-                    <td>
-<label>                        <input id="birthdays"  checked class="e-resource-calendar e-birthday" value="3" type="checkbox" onchange="onChange(this)" />Area 3</label>
-                    </td>
-                    <td>
-       <label>                 <input id="holidays"  checked class="e-resource-calendar e-holiday" value="4" type="checkbox" onchange="onChange(this)" />Area 4</label>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+              <div class="row" id="area-container">
+
+              </div>
+   
     </div>
         <br />
         <div id="Schedule"></div>
@@ -249,12 +235,75 @@
         </div>
     </div>
         <script>
-            let calendarCollections = [
-                { OwnerText: 'Area 1', Id: 1, CalendarColor: '#c43081' },
-                { OwnerText: 'Area 2', Id: 2, CalendarColor: '#ff7f50' },
-                { OwnerText: 'Area 3', Id: 3, CalendarColor: '#AF27CD' },
-                { OwnerText: 'Area 4', Id: 4, CalendarColor: '#808000' }
-            ];
+
+            
+            let token = localStorage.getItem("token");
+
+            var base = 'http://localhost:4500/api/v1/';
+
+            
+            let serviceCenterCollection = [];
+
+            $.ajax({
+                type: "GET",
+                url: base+"ServiceCenters/SC_GetServiceCenters",
+                headers: {
+                    'Access-Control-Allow-Headers': 'Authorization',
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'json',
+                success: function (result, status, xhr) {
+                    $.each(result.Data, function (i, v) {
+                        let chk = ''
+                        var col = { Name: v.ServiceCenterName, Id: v.ServiceCenterId };
+                        serviceCenterCollection.push(col);
+                        if (i == 0) {
+                            scheduleObj.addResource(col, 'ServiceCenter', i);
+                            chk = 'checked';
+                        }
+                        var html = '<div class="col-6 col-sm-4 col-md-3"><label> <input value="' + v.ServiceCenterId + '" ' + chk + ' class="e-resource-calendar e-personal" type="checkbox" onchange="onChange(this,\'' + v.ServiceCenterName + '\',' + i + ')" /> ' + v.ServiceCenterName + '</label></div>';
+                        $('#area-container').append(html);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    alert(xhr);
+                }
+            });
+
+            function LoadEvents() {
+                var Ids = serviceCenterCollection.map(function (v) { return v.Id });
+                let StartDate = scheduleObj.activeView.renderDates[0];
+                let EndDate = scheduleObj.activeView.renderDates[scheduleObj.activeView.renderDates.length - 1];
+                var data = { Ids, StartDate, EndDate };
+                $.ajax({
+                    type: "GET",
+                    url: base + "ServiceCenters/SC_GetAllAppointments",
+                    headers: {
+                        'Access-Control-Allow-Headers': 'Authorization',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    data: JSON.stringify(data),
+                    contentType : "application/json; charset=utf8",
+                    dataType: 'json',
+                    success: function (result, status, xhr) {
+                        $.each(result.Data, function (i, v) {
+                            
+                        })
+
+
+                    },
+                    error: function (xhr, status, error) {
+                        alert(xhr);
+                    }
+                });
+            }
+            //var base_url = '/api/appointment/';
+            //$.get(base_url + 'GetAppointments', function (response) {
+            //    console.log('received from api', response);
+            //    scheduleObj.addEvent(response);
+            //});
+
+            
 
             // initialize DatePicker component
             var datepicker = new ej.calendars.DateTimePicker();
@@ -266,36 +315,37 @@
                 Id: 1,
                 Subject: 'Paris',
                 StartTime: new Date(2018, 1, 15, 10, 0),
-                EndTime: new Date(2018, 1, 15, 12, 30),
+                EndTime: new Date(2018, 1, 15, 10, 30),
+                ServiceCenterId: 4
             }];
+
             var scheduleObj = new ej.schedule.Schedule({
                 height: '550px',
-                selectedDate: new Date(2018, 1, 15),
+                selectedDate: new Date(),
                 views: ['Day', 'Week', 'TimelineWeek', 'Month', 'Agenda'],
                 eventSettings: { dataSource: data },
                 group: {
-                    resources: ['Owners']
+                    resources: ['ServiceCenter']
                 },
                 resources: [{
-                    field: 'OwnerId', title: 'Owner',
-                    name: 'Owners', allowMultiple: true,
-                    dataSource: calendarCollections,
-                    textField: 'OwnerText', idField: 'Id', colorField: 'OwnerColor'
+                    field: 'ServiceCenterId', title: 'Service Center',
+                    name: 'ServiceCenter', allowMultiple: true,
+                    dataSource: serviceCenterCollection,
+                    textField: 'Name', idField: 'Id'
                 }],
             });
             scheduleObj.appendTo('#Schedule');
 
 
-            function onChange(args) {
+            function onChange(args,name,i) {
                 let checked = $(args).is(':checked')
                 var value = parseInt($(args).val());
-                var col = calendarCollections[value - 1];
+                var col = { Name: name, Id: value };
                 if (checked) {
-                    scheduleObj.addResource(col, 'Owners', value - 1);
+                    scheduleObj.addResource(col, 'ServiceCenter', i);
                 } else {
-                    console.log(value);
-                    scheduleObj.removeResource(value, 'Owners');
-                    //scheduleObj.removeResource(4, 'Owners')
+                    scheduleObj.removeResource(value, 'ServiceCenter');
+                    //scheduleObj.removeResource(4, 'ServiceCenter')
                 }
             }
             scheduleObj.actionBegin = function actionBegin(e) {

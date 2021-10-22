@@ -126,6 +126,11 @@
 
 
     <script src="Scripts/jquery-3.4.1.min.js"></script>
+    <script src="Scripts/web/main.js"></script>
+    <script src="Scripts/web/_main.js"></script>
+    <script src="Scripts/web/_forget.js"></script>
+    <!--===============================================================================================-->
+    <script src="Scripts/Fliper.js"></script>
     <script type="application/javascript">
 
         function login() {
@@ -137,7 +142,7 @@
             mybutton.innerHTML = "Login &nbsp;<i style='font-size:20px;' class='fa fa-spinner faa-spin animated'></i>";
 
             var options = {};
-            options.url = base = 'http://localhost:4500/api/v1/Accounts/login'; //"http://api.markaziasystems.com/api/v1/Accounts/login";
+            options.url = base ="http://api.markaziasystems.com/api/v1/Accounts/login";// 'http://localhost:4500/api/v1/Accounts/login'; //
 
             options.type = "POST";
 

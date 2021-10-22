@@ -161,7 +161,7 @@
         }
     </style>
     <div class="row">
-        <h1>Appointments</h1>
+        <h4 class="col-12">Appointments</h4>
         <div class="col-lg-12 property-section">
             <div class="row" id="area-container">
             </div>
@@ -171,9 +171,9 @@
                 </div>
             </div>
         </div>
-        <br />
         <div class="col-12">
             <div id="Schedule"></div>
+        </div>
         </div>
         <script id="apptemplate" type="text/x-template">
     <div class="template-wrap" style="background:${SecondaryColor}">
@@ -409,7 +409,7 @@
 
             let token = localStorage.getItem("token");
             var base = 'http://api.markaziasystems.com/api/v1/';
-            base = 'http://localhost:4500/api/v1/';
+            //base = 'http://localhost:4500/api/v1/';
             let serviceCenterCollection = [];
             let autoSearch = false;
             function select2_search($el, term) {

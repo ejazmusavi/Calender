@@ -1,35 +1,54 @@
 ﻿<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="Calender._Default" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<style>
-    /* modal backdrop fix */
-#diallog-customer,#diallog-vin {
-    z-index: 1053 !important;
-}
-.modal-backdrop.show:nth-of-type(even) {
-    z-index: 1052 !important;
-}
-#diallog-customer .modal-body,#diallog-vin .modal-body{
-    padding:0px 15px;
-}
-.select2-container--open .select2-dropdown{
-    z-index:1055;
-}
-.modal-body{
-            padding:0;
+    <style>
+        .e-canceled {
+            background-color: red !important;
         }
-        .tab-content{
-            padding:15px;
+        /* modal backdrop fix */
+        #diallog-customer, #diallog-vin {
+            z-index: 1053 !important;
+        }
+
+        .modal-backdrop.show:nth-of-type(even) {
+            z-index: 1052 !important;
+        }
+
+        #diallog-customer .modal-body, #diallog-vin .modal-body {
+            padding: 0px 15px;
+        }
+
+        .select2-container--open .select2-dropdown {
+            z-index: 1055;
+        }
+
+        .modal-body {
+            padding: 0;
+        }
+
+        .tab-content {
+            padding: 15px;
             padding-bottom: 0;
         }
-       .input-group .select2-container{
+
+        .input-group .select2-container {
             min-width: calc(100% - 127px);
         }
-      .input-group  .select2-container--default .select2-selection--single .select2-selection__arrow,
-       .input-group .select2-container .select2-selection--single{
-            height: 38px;border-radius: 0;
-            border-color: #ced4da;
+
+            .input-group .select2-container--default .select2-selection--single .select2-selection__arrow,
+            .input-group .select2-container .select2-selection--single {
+                height: 38px;
+                border-radius: 0;
+                border-color: #ced4da;
+            }
+
+        #txtDuration {
+            max-width: 95px;
+            float: right;
+            padding-top: 0;
+            padding-bottom: 0;
+            line-height: 12px;
+            height: 31px;
         }
         /* Profile container */
         .profile {
@@ -43,7 +62,7 @@
         }
 
         .profile-userpic img {
-            display:block;
+            display: block;
             float: none;
             margin: 0 auto;
             width: 50%;
@@ -98,9 +117,9 @@
             .profile-usermenu ul li {
                 border-bottom: 1px solid #f0f4f7;
                 padding: 2px 10px 2px 10px;
-                width:100%;
-                float:left;
-                display:block;
+                width: 100%;
+                float: left;
+                display: block;
             }
 
                 .profile-usermenu ul li:last-child {
@@ -146,11 +165,23 @@
         <div class="col-lg-12 property-section">
             <div class="row" id="area-container">
             </div>
-
+            <div class="row">
+                <div class="mb-2 text-right col-12">
+                    <a href="/Report" class="btn btn-info float-right">Generate Report</a>
+                </div>
+            </div>
         </div>
         <br />
-        <div id="Schedule"></div>
+        <div class="col-12">
+            <div id="Schedule"></div>
+        </div>
+        <script id="apptemplate" type="text/x-template">
+    <div class="template-wrap" style="background:${SecondaryColor}">
+        <div class="e-subject" style="background:${PrimaryColor}">${Subject}</div>
+        <div class="e-time" style="background:${PrimaryColor}">Time: ${getTimeString(data.StartTime)} - ${getTimeString(data.EndTime)}</div>
+    </div>
 
+        </script>
 
         <div id="dialog1" class="modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
@@ -169,8 +200,8 @@
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade  show active in" id="home" role="tabpanel" aria-labelledby="home-tab">
-                                <input type="hidden" id="txtCenterId" value="0"/>
-                                <input type="hidden" id="txtAppointmentId" value="0"/>
+                                <input type="hidden" id="txtCenterId" value="0" />
+                                <input type="hidden" id="txtAppointmentId" value="0" />
 
                                 <div class="form-group row mt-3">
                                     <label for="inputEmail3" class="col-sm-3 col-form-label">Service</label>
@@ -182,15 +213,30 @@
                                 <div class="form-group row">
                                     <label for="inputEmail3" class="col-sm-3 col-form-label">Date/Time(Start)</label>
                                     <div class="col-sm-9">
-                                        <input type="email" class="form-control" id="FromDateTime" placeholder="date and time">
+                                        <input type="email" class="form-control" id="FromDateTime" readonly placeholder="date and time">
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="inputEmail3" class="col-sm-3 col-form-label">Duration</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" class="form-control" value="0" readonly id="txtDuration" name="TotalDuration" />
+
+                                    <div class="col">
+                                        <div class="row">
+                                            <label for="inputEmail3" class="col-sm-3 col-form-label">Duration</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" value="0" readonly id="txtDuration" name="TotalDuration" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group row">
+                                            <label for="inputEmail3" class="col-sm-3 col-form-label">Status</label>
+                                            <div class="col-sm-9">
+                                                <select class="form-control" id="drpStatus" name="LabelId">
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+
                                 <div class="form-group row">
                                     <label for="inputEmail3" class="col-sm-3 col-form-label">Notes</label>
                                     <div class="col-sm-9">
@@ -208,7 +254,6 @@
                                                     <span class="input-group-text">Search</span>
                                                 </div>
                                                 <select id="search-customer" class="form-control select2remote">
-                                                    
                                                 </select>
                                                 <div class="input-group-append">
                                                     <span class="input-group-text"><a href="#" data-toggle="modal" data-target="#diallog-customer">Add</a></span>
@@ -225,7 +270,6 @@
                                             <!-- SIDEBAR USER TITLE -->
                                             <div class="profile-usertitle">
                                                 <div class="profile-usertitle-name" id="lblcustname">
-                                                    
                                                 </div>
                                             </div>
                                             <!-- END SIDEBAR USER TITLE -->
@@ -237,15 +281,15 @@
                                                         <div class="form-group">
                                                             <label>Select VIN</label>
                                                             <div class="input-group mb-3">
-                                                
-                                                <select class="form-control" name="VIN" id="drpVIN">
-                                                 </select>
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text">
-                                                        <a href="#" data-toggle="modal" data-target="#diallog-vin"><i class="fa fa-plus"></i>Add</a>
-</span>
-                                                </div>
-                                            </div>
+
+                                                                <select class="form-control" name="VIN" id="drpVIN">
+                                                                </select>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text">
+                                                                        <a href="#" data-toggle="modal" data-target="#diallog-vin"><i class="fa fa-plus"></i>Add</a>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
 
                                                         </div>
                                                     </li>
@@ -269,11 +313,11 @@
                         <hr />
                         <div class="w-100" id="response"></div>
                         <div class="text-right w-100">
-                        <button type="button" class="btn btn-default float-left mr-3" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-default float-left mr-3" data-dismiss="modal">Close</button>
 
-                        <button type="button" class="btn btn-danger float-left" id="btnDelete" onclick="DeleteEvent()">Delete</button>
+                            <button type="button" class="btn btn-danger float-left" id="btnDelete" onclick="DeleteEvent()">Delete</button>
 
-                        <button type="button" class="btn btn-primary" id="btnSave" onclick="SaveChanges()">Save changes</button>
+                            <button type="button" class="btn btn-primary" id="btnSave" onclick="SaveChanges()">Save changes</button>
                         </div>
                     </div>
                 </div>
@@ -284,7 +328,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                       <h4>Add New Customer</h4>
+                        <h4>Add New Customer</h4>
                     </div>
                     <div class="modal-body">
                         <div class="form-group row" style="padding-top: 15px;">
@@ -310,7 +354,7 @@
 
                     </div>
                     <div class="modal-footer">
-                        
+
                         <div class="w-100" id="customer-response"></div>
 
                         <button type="button" class="btn btn-primary" id="btnSaveCustomer" onclick="SaveCustomer()">Save changes</button>
@@ -325,10 +369,10 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                       <h4>Add New VIN</h4>
+                        <h4>Add New VIN</h4>
                     </div>
                     <div class="modal-body ">
-                        
+
                         <div class="form-group row mt-3">
                             <label for="inputEmail3" class="col-sm-3 col-form-label">Vehicle No</label>
                             <div class="col-sm-9">
@@ -339,21 +383,21 @@
                         <div class="form-group row">
                             <label for="inputEmail3" class="col-sm-3 col-form-label">Brand</label>
                             <div class="col-sm-9">
-                                 <select class="form-control" id="drpBrand" name="Service" >
-                                        </select>
+                                <select class="form-control" id="drpBrand" name="Service">
+                                </select>
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="inputEmail3" class="col-sm-3 col-form-label">Model</label>
                             <div class="col-sm-9">
-                                 <select class="form-control" id="drpModel" name="Service" >
-                                        </select>
+                                <select class="form-control" id="drpModel" name="Service">
+                                </select>
                             </div>
                         </div>
 
                     </div>
                     <div class="modal-footer">
-                        
+
                         <div class="w-100" id="vin-response"></div>
                         <button type="button" class="btn btn-primary" id="btnSaveVIN" onclick="SaveVIN()">Save changes</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -361,12 +405,11 @@
                 </div>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
 
             let token = localStorage.getItem("token");
-            var base = 'http://localhost:4500/api/v1/';
-           
+            var base = 'http://api.markaziasystems.com/api/v1/';
+            base = 'http://localhost:4500/api/v1/';
             let serviceCenterCollection = [];
             let autoSearch = false;
             function select2_search($el, term) {
@@ -380,11 +423,11 @@
                 $search.val(term);
                 autoSearch = true;
                 $search.trigger('input');
-                
+
             }
-            
-          let drpCustomer=  $('#search-customer').select2({
-                    placeholder: "Search Customer",
+
+            let drpCustomer = $('#search-customer').select2({
+                placeholder: "Search Customer",
                 allowClear: true,
                 minimumInputLength: 1,
                 ajax: {
@@ -413,7 +456,7 @@
                     }
                 }
             });
-            
+
             drpCustomer.on('change', function () {
                 var selected = $(this).select2('data')[0];
                 if (selected) {
@@ -457,12 +500,12 @@
             function LoadEvents() {
                 scheduleObj.showSpinner();
                 if (scheduleObj.eventsData.length > 0) {
-                    scheduleObj.deleteEvent(scheduleObj.eventsData)
+                    scheduleObj.deleteEvent(scheduleObj.eventsData);
                     scheduleObj.eventsData = [];
                 }
                 let StartDate = scheduleObj.activeView.renderDates[0];
                 let EndDate = scheduleObj.activeView.renderDates[scheduleObj.activeView.renderDates.length - 1];
-                
+
                 var data = { StartDate: moment(StartDate).format('MM/DD/YYYY'), EndDate: moment(EndDate).format('MM/DD/YYYY') };
                 $.ajax({
                     type: "GET",
@@ -475,19 +518,22 @@
                     contentType: "application/json; charset=utf8",
                     dataType: 'json',
                     success: function (result, status, xhr) {
-                        var events = result.Data.map(function (v,i) {
+                        var events = result.Data.map(function (v, i) {
                             return {
-                                Id: v.AppointmentID,
+                                AppointmentID: v.AppointmentId,
+                                Id: v.AppointmentId,
                                 Notes: v.Notes,
                                 Subject: v.CustomerName,
-                                StartTime:new Date( v.AppointmentDate),
+                                StartTime: new Date(v.AppointmentDate),
                                 EndTime: moment(new Date(v.AppointmentDate))
                                     .add(v.TotalDuration, 'minutes').toDate(),
                                 ServiceCenterId: v.CenterID,
                                 AppointmentServices: v.SCAppointmentServices,
                                 VINID: v.VINID,
                                 CustomerID: v.CustomerID,
-                                SendReminder: v.SendReminder
+                                SendReminder: v.SendReminder,
+                                Status: v.Status,
+                                LabelId: v.LabelId
                             }
                         });
                         scheduleObj.addEvent(events);
@@ -499,7 +545,7 @@
                     }
                 });
             }
-            
+
 
             // initialize DatePicker component
             var datepicker = new ej.calendars.DateTimePicker();
@@ -513,11 +559,8 @@
                 selectedDate: new Date(),
                 views: ['Day', 'Week', 'TimelineWeek', 'Month', 'Agenda'],
                 eventSettings: { dataSource: data },
-                //workHours: {
-                //    highlight: true,
-                //    start: '09:00',
-                //    end: '18:00'
-                //},
+                startHour: '08:00',
+                endHour: '22:00',
                 workDays: [0, 1, 2, 3, 4, 6],
                 firstDayOfWeek: 5,
                 timeScale: {
@@ -528,7 +571,6 @@
                 group: {
                     resources: ['ServiceCenter']
                 },
-
                 resources: [{
                     field: 'ServiceCenterId', title: 'Service Center',
                     name: 'ServiceCenter', allowMultiple: true,
@@ -538,7 +580,18 @@
             });
             scheduleObj.appendTo('#Schedule');
             scheduleObj.showSpinner();
-
+            var ele;
+            scheduleObj.eventRendered = function (args) {
+                console.log('rendered', args);
+                if (args.data.Status == 'Cancelled' || args.data.Status == 'Canceled') {
+                    args.element.classList.add('e-canceled')
+                }
+            }
+            scheduleObj.renderCell = function (args) {
+                if (args.date < new Date(new Date().setHours(0, 0, 0, 0))) {
+                    args.element.classList.add('e-disableCell');
+                }
+            }
             var workingDays = [];
             workingDays["Sunday"] = 0;
             workingDays["Monday"] = 1;
@@ -547,6 +600,7 @@
             workingDays["Thursday"] = 4;
             workingDays["Friday"] = 5;
             workingDays["Saturday"] = 6;
+            //Get Service Centers
             $.ajax({
                 type: "GET",
                 url: base + "ServiceCenters/SC_GetServiceCenters",
@@ -562,10 +616,10 @@
                     $.each(result.Data, function (i, v) {
                         let chk = ''
                         let resourceWorkingDays = [];
-                    let resourceWorkingHours = [];
+                        let resourceWorkingHours = [];
                         $.each(v.AptCenterWorkingDays, function (j, d) {
                             resourceWorkingDays.push(workingDays[d.DayName] ?? 3);
-                            resourceWorkingHours.push({ dayIndex: workingDays[d.DayName]??3, startHour: d.StartingHour, endHour: d.EndingHour });
+                            resourceWorkingHours.push({ dayIndex: workingDays[d.DayName] ?? 3, startHour: d.StartingHour, endHour: d.EndingHour });
                         });
                         var col = { Name: v.ServiceCenterName, Id: v.ServiceCenterId, workDays: resourceWorkingDays, workHours: resourceWorkingHours };
                         console.log(col);
@@ -588,6 +642,32 @@
 
                 }
             });
+            //End Get Service Centers
+
+            //Get Status from lookup
+            $.ajax(
+                {
+                    url: base + 'Appointments/SC_GetAppintmentStatus',
+                    type: "GET",
+                    headers: {
+                        'Access-Control-Allow-Headers': 'Authorization',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    dataType: 'json',
+                    success: function (result, status, xhr) {
+                        let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData }; });
+                        $("#drpStatus").select2({
+                            width: '100%',
+                            data: data
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        alert(xhr);
+                    }
+                }
+            );
+            //End Get Status from Lookup
+
             function onChange(args, name, i) {
                 let checked = $(args).is(':checked')
                 var value = parseInt($(args).val());
@@ -618,49 +698,51 @@
                     LoadEvents();
                 }
             }
-            scheduleObj.actionBegin = function actionBegin(e) {
-                console.log('action begin', e);
-                
-                if (e.requestType === "eventRemove") {
+            //scheduleObj.actionBegin = function actionBegin(e) {
+            //    console.log('action begin', e);
 
-                    //let url = "/Schedules/delete/";
-                    //$.post(url, { id: e.data[0].Id }, function (data) {
-                    //    if (data) {
-                    //    }
-                    //    else {
-                    //        e.cancel = true;
-                    //    }
-                    //});
-                }
-                else if (e.requestType === "eventChange") {
-                    //let url = "/Schedules/DragDrop/";
-                    //$.post(url, { e: JSON.stringify(e.data) }, function (data) {
-                    //    if (data) {
-                    //    }
-                    //    else {
-                    //        e.cancel = true;
-                    //    }
-                    //});
-                }
-            }
+            //    if (e.requestType === "eventRemove") {
+
+            //        //let url = "/Schedules/delete/";
+            //        //$.post(url, { id: e.data[0].Id }, function (data) {
+            //        //    if (data) {
+            //        //    }
+            //        //    else {
+            //        //        e.cancel = true;
+            //        //    }
+            //        //});
+            //    }
+            //    else if (e.requestType === "eventChange") {
+            //        //let url = "/Schedules/DragDrop/";
+            //        //$.post(url, { e: JSON.stringify(e.data) }, function (data) {
+            //        //    if (data) {
+            //        //    }
+            //        //    else {
+            //        //        e.cancel = true;
+            //        //    }
+            //        //});
+            //    }
+            //}
             scheduleObj.popupOpen = function onPopupOpen(args) {
                 Reset();
                 var event = args.data;
-                if (!args.target.classList.contains('e-work-hours') & !event.Id) {
+                if (args.target.classList.contains('e-disableCell') || !args.target.classList.contains('e-work-hours') & !event.Id) {
                     args.cancel = true;
                     return;
                 }
-                
+
                 console.log(args);
                 datepicker.value = event.StartTime;
                 $('#txtCenterId').val(event.ServiceCenterId);
                 if (event.Id && event.Id > 0) {
                     $('#txtAppointmentId').val(event.Id);
+                    $('#drpStatus').val(event.LabelId).trigger('change');
                     $('#txtNotes').val(event.Notes);
                     //SearchCustomer(event.CustomerID);
                     VINId = event.VINID;
                     select2_search($('#search-customer'), event.CustomerID);
                     $('#cbxReminder').attr('checked', event.SendReminder);
+
                     $('#btnDelete').show();
                 }
                 else {
@@ -680,7 +762,7 @@
                             return v.ServiceID
                         });
 
-                       $("#drpService").select2({
+                        $("#drpService").select2({
                             data: data,
                             width: '100%',
                             placeholder: 'Select Services',
@@ -702,8 +784,8 @@
                         type = 'edit';
                         args.cancel = true;
                         // yyyy-mm-ddThh:mm
-                        
-                       
+
+
                         $('#dialog1').modal('show');
                     }
             }
@@ -729,17 +811,17 @@
                 $(mybutton).attr("disabled", "disabled");
                 mybutton.innerHTML = "Save changes &nbsp;<i style='font-size:20px;' class='fa fa-spinner faa-spin animated'></i>";
                 var model = {};
-                model.AppointmentID = parseInt($('#txtAppointmentId').val());
+                model.AppointmentId = parseInt($('#txtAppointmentId').val());
                 model.CustomerID = parseInt($('#search-customer').val());
                 model.CenterID = parseInt($('#txtCenterId').val());
                 model.VINID = parseInt($('#drpVIN').val());
                 model.AppointmentDate = datepicker.value;
                 model.SendReminder = $('#cbxReminder').is(':checked');
-
+                model.LabelId = $('#drpStatus').val();
                 model.Notes = $('#txtNotes').val();
 
-                if (!model.AppointmentID)
-                    model.AppointmentID = 0;
+                if (!model.AppointmentId)
+                    model.AppointmentId = 0;
 
                 if (!model.CustomerID) {
                     showError('Please select a Customer to continue.', mybutton);
@@ -749,14 +831,14 @@
                     showError('Please select a VIN to continue.', mybutton);
                     return false;
                 }
-               var services = $('#drpService').select2('data');
+                var services = $('#drpService').select2('data');
                 model.AppointmentServices = services.map(function (v) { return { ServiceID: v.id, Duration: v.timeReq } });
-                if (!model.AppointmentServices || model.AppointmentServices.length==0) {
+                if (!model.AppointmentServices || model.AppointmentServices.length == 0) {
                     showError('Please atlease One Service to continue.', mybutton);
                     return false;
                 }
                 var options = {};
-                options.url = base + (model.AppointmentID > 0 ? "Appointments/SC_Edit_Appointment": "Appointments/SC_Add_Appointment");
+                options.url = base + (model.AppointmentId > 0 ? "Appointments/SC_Edit_Appointment" : "Appointments/SC_Add_Appointment");
                 options.type = "POST";
                 options.headers = {
                     'Access-Control-Allow-Headers': 'Authorization',
@@ -768,12 +850,12 @@
 
                 options.success = function (response) {
                     if (response.Success) {
-                        if (model.AppointmentID > 0) {
+                        if (model.AppointmentId > 0) {
                             scheduleObj.deleteEvent(response.Data)
                         }
-                    let newEvent = {
+                        let newEvent = {
                             Id: response.Data,
-                            Subject: 'New Event',
+                            Subject: $('#search-customer').select2('data')[0].text,
                             StartTime: model.AppointmentDate,
                             EndTime: moment(model.AppointmentDate)
                                 .add($('#txtDuration').val(), 'minutes').toDate(),
@@ -782,9 +864,12 @@
                             VINID: model.VINID,
                             CustomerID: model.CustomerID,
                             SendReminder: model.SendReminder,
-                            Notes: model.Notes
+                            Notes: model.Notes,
+                            Status: $('#drpStatus').select2('data')[0].text,
+                            LabelId: $('#drpStatus').val()
                         };
-                        scheduleObj.addEvent(newEvent);
+                        var added = scheduleObj.addEvent(newEvent);
+                        console.log('event added', added);
                         Reset();
                         $("#response").html("<span class='alert alert-info text-info my-2 d-block'>Appointment Saved successfully.</span> ");
                         $(mybutton).css("opacity", "1");
@@ -803,7 +888,7 @@
             }
 
             function showError(message, mybutton, errorcontainer) {
-                if (!errorcontainer || errorcontainer=='')
+                if (!errorcontainer || errorcontainer == '')
                     errorcontainer = 'response';
                 $("#" + errorcontainer + "").html("<span class='alert alert-danger text-danger my-2 d-block' >" + message + "</span> ");
                 $(mybutton).css("opacity", "1");
@@ -954,7 +1039,7 @@
                         mybutton.innerHTML = "Save changes";
                     }
                     else {
-                        showError('Error occured while trying to save the Customer!.', mybutton,'customer-response');
+                        showError('Error occured while trying to save the Customer!.', mybutton, 'customer-response');
                     }
                 };
                 options.error = function () {
@@ -963,7 +1048,7 @@
                 $.ajax(options);
             }
 
-            
+
             $.ajax(
                 {
                     url: base + 'Lookups/SC_GetLookups?CodeType=1301',
@@ -1033,12 +1118,12 @@
                 model.ModelId = $('#drpModel').val();
 
                 console.log(model)
-                
+
                 if (!model.AccountId) {
                     showError('Please select a Customer to continue.', mybutton, 'vin-response');
                     return false;
                 }
-                if (model.VehicleNumber=='') {
+                if (model.VehicleNumber == '') {
                     showError('Please enter Vehicle Number to continue.', mybutton, 'vin-response');
                     return false;
                 }

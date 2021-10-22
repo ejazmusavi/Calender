@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 
 namespace Calender
 {
-    public partial class About : Page
+    public partial class Report : Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {

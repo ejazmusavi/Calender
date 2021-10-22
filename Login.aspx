@@ -137,7 +137,8 @@
             mybutton.innerHTML = "Login &nbsp;<i style='font-size:20px;' class='fa fa-spinner faa-spin animated'></i>";
 
             var options = {};
-            options.url = "http://localhost:4500/api/v1/Accounts/login";
+            options.url = base = 'http://localhost:4500/api/v1/Accounts/login'; //"http://api.markaziasystems.com/api/v1/Accounts/login";
+
             options.type = "POST";
 
             var obj = {};

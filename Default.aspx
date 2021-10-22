@@ -213,7 +213,7 @@
                                 <div class="form-group row">
                                     <label for="inputEmail3" class="col-sm-3 col-form-label">Date/Time(Start)</label>
                                     <div class="col-sm-9">
-                                        <input type="email" class="form-control" id="FromDateTime" readonly placeholder="date and time">
+                                        <input type="email" class="form-control" id="FromDateTime" placeholder="date and time">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -409,7 +409,7 @@
 
             let token = localStorage.getItem("token");
             var base = 'http://api.markaziasystems.com/api/v1/';
-            //base = 'http://localhost:4500/api/v1/';
+            base = 'http://localhost:4500/api/v1/';
             let serviceCenterCollection = [];
             let autoSearch = false;
             function select2_search($el, term) {
@@ -730,8 +730,8 @@
                     args.cancel = true;
                     return;
                 }
-
-                console.log(args);
+                //$('.nav-tabs a[href="#home-tab"]').tab('show');
+                $('#myTab a:first').tab('show')
                 datepicker.value = event.StartTime;
                 $('#txtCenterId').val(event.ServiceCenterId);
                 if (event.Id && event.Id > 0) {
@@ -891,6 +891,10 @@
                 if (!errorcontainer || errorcontainer == '')
                     errorcontainer = 'response';
                 $("#" + errorcontainer + "").html("<span class='alert alert-danger text-danger my-2 d-block' >" + message + "</span> ");
+                setTimeout(function () {
+                    $("#" + errorcontainer + "").html("");
+                }, 5000);
+
                 $(mybutton).css("opacity", "1");
                 $(mybutton).css("cursor", "pointer");
                 $(mybutton).removeAttr("disabled");
@@ -977,7 +981,7 @@
                         $(mybutton).css("opacity", "1");
                         $(mybutton).css("cursor", "pointer");
                         $(mybutton).removeAttr("disabled");
-                        mybutton.innerHTML = "Save changes";
+                        mybutton.innerHTML = "Delete";
                     }
                     else {
                         showError('Error occured while trying to delete the appointment!.', mybutton);
@@ -1032,7 +1036,11 @@
                         $('#FirstName').val('');
                         $('#LastName').val('');
                         $('#Mobile').val('');
-                        $("#response").html("<span class='alert alert-info text-info my-2 d-block'>Customer Saved successfully.</span> ");
+                        $("#customer-response").html("<span class='alert alert-info text-info my-2 d-block'>Customer Saved successfully.</span> ");
+                        setTimeout(function () {
+                            $("#vin-response").html("");
+                        }, 5000);
+
                         $(mybutton).css("opacity", "1");
                         $(mybutton).css("cursor", "pointer");
                         $(mybutton).removeAttr("disabled");
@@ -1147,7 +1155,11 @@
                     if (response.Success) {
                         $('#search-customer').trigger('change');
                         $('#VehicleNo').val('');
-                        $("#response").html("<span class='alert alert-info text-info my-2 d-block'>VIN Saved successfully.</span> ");
+                        $("#vin-response").html("<span class='alert alert-info text-info my-2 d-block'>VIN Saved successfully.</span> ");
+                        setTimeout(function () {
+                            $("#vin-response").html("");
+                        }, 5000);
+
                         $(mybutton).css("opacity", "1");
                         $(mybutton).css("cursor", "pointer");
                         $(mybutton).removeAttr("disabled");

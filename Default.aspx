@@ -312,7 +312,7 @@
                         <hr />
                         <div class="w-100" id="response"></div>
                         <div class="text-right w-100">
-                            <button type="button" class="btn btn-default float-left mr-3" data-dismiss="modal">Close</button>
+                            <button type="button" id="btnCloseCustomer" class="btn btn-default float-left mr-3" data-dismiss="modal">Close</button>
 
                             <button type="button" class="btn btn-danger float-left" id="btnDelete" onclick="DeleteEvent()">Delete</button>
 
@@ -886,6 +886,7 @@
                         $(mybutton).css("cursor", "pointer");
                         $(mybutton).removeAttr("disabled");
                         mybutton.innerHTML = "Save changes";
+                        $('#btnCloseCustomer').trigger('click');
                     }
                     else {
                         showError('Error occured while trying to save the appointment!.', mybutton);
@@ -992,6 +993,7 @@
                         $(mybutton).css("cursor", "pointer");
                         $(mybutton).removeAttr("disabled");
                         mybutton.innerHTML = "Delete";
+                        $('#btnCloseCustomer').trigger('click');
                     }
                     else {
                         showError('Error occured while trying to delete the appointment!.', mybutton);
@@ -1048,7 +1050,7 @@
                         $('#Mobile').val('');
                         $("#customer-response").html("<span class='alert alert-info text-info my-2 d-block'>Customer Saved successfully.</span> ");
                         setTimeout(function () {
-                            $("#vin-response").html("");
+                            $("#customer-response").html("");
                         }, 5000);
 
                         $(mybutton).css("opacity", "1");

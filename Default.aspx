@@ -161,7 +161,6 @@
         }
     </style>
     <div class="row">
-        <h4 class="col-12">Appointments</h4>
         <div class="col-lg-12 property-section">
             <div class="row" id="area-container">
             </div>
@@ -407,7 +406,11 @@
         </div>
         <script>
 
+            
             let token = localStorage.getItem("token");
+            if (!token || token == '') {
+                $(location).attr("href", '/Login');
+            }
             var base = 'http://api.markaziasystems.com/api/v1/';
             //base = 'http://localhost:4500/api/v1/';
             let serviceCenterCollection = [];
@@ -557,6 +560,7 @@
             var scheduleObj = new ej.schedule.Schedule({
                 height: '550px',
                 selectedDate: new Date(),
+                allowDragAndDrop:false,
                 views: ['Day', 'Week', 'TimelineWeek', 'Month', 'Agenda'],
                 eventSettings: { dataSource: data },
                 startHour: '08:00',
@@ -694,9 +698,15 @@
                 }
             }
             scheduleObj.actionComplete = function (e) {
-                if (e.requestType == 'dateNavigate') {
+                console.log('complete action',e);
+                if (e.requestType == 'dateNavigate' || e.requestType == 'viewNavigate') {
                     LoadEvents();
                 }
+            }
+            scheduleObj.navigating = function (e) {
+                //if (e.action == 'date' || e.action == 'view') {
+                //    LoadEvents();
+                //}
             }
             //scheduleObj.actionBegin = function actionBegin(e) {
             //    console.log('action begin', e);

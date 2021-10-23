@@ -51,6 +51,9 @@
     <script>
 
         let token = localStorage.getItem("token");
+        if (!token || token == '') {
+            $(location).attr("href", '/Login');
+        }
         var base = 'http://api.markaziasystems.com/api/v1/';
         //base = 'http://localhost:4500/api/v1/';
         $('#drpService').select2();

@@ -6,7 +6,7 @@
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%: Page.Title %> - Appointment Calender</title>
+    <title><%: Page.Title %> - Appointment</title>
     <asp:PlaceHolder runat="server">
         <%: Scripts.Render("~/bundles/modernizr") %>
     </asp:PlaceHolder>
@@ -45,11 +45,22 @@
         </asp:ScriptManager>
 
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        <div class="navbar navbar-inverse navbar-fixed-top">
-            <div class="container">
-               
+            <div class="container mb-1 px-0">
+                <div class="row no-gutters border-bottom">
+                    <div class="col text-center text-md-left">         
+                        <h4 ><a href="Default.aspx">
+                Appointments</a>
+                        </h4>
+                        <a href="#" onclick="Logout()">Logout</a>
+                    </div>
+                    <div class="col text-center text-md-right mb-3">
+                <a href="Default.aspx">
+                <img src="Content/logo.jpg" style="max-width:150px" />
+                    </a>
+                    </div>
+                </div>
             </div>
-        </div>
+      
         <div class="container body-content">
             <asp:ContentPlaceHolder ID="MainContent" runat="server">
             </asp:ContentPlaceHolder>
@@ -58,8 +69,13 @@
                 <p>&copy; <%: DateTime.Now.Year %> - Appointment Calender</p>
             </footer>
         </div>
-
     </form>
-    
+    <script>
+        function Logout() {
+            localStorage.setItem("token", "");
+            window.localStorage.removeItem("token");
+            $(location).attr("href", '/Login');
+        }
+    </script>
 </body>
 </html>

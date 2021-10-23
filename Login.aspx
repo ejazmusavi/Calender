@@ -126,13 +126,27 @@
 
 
     <script src="Scripts/jquery-3.4.1.min.js"></script>
-    <script src="Scripts/web/main.js"></script>
-    <script src="Scripts/web/_main.js"></script>
-    <script src="Scripts/web/_forget.js"></script>
     <!--===============================================================================================-->
-    <script src="Scripts/Fliper.js"></script>
+    
     <script type="application/javascript">
 
+        
+        $('.input100').on('change', function () {
+            if ($(this).val().trim() != "") {
+                $(this).addClass('has-val');
+            } else {
+                $(this).removeClass('has-val');
+            }
+        })
+        $(function(){
+setTimeout(function () {
+            //$('#txtEmail').val('');
+            //$('#txtPassword').val('')
+            $('.input100').trigger('change');
+        }, 10);
+        $('.input100').trigger('change');
+        })
+        
         function login() {
 
             var mybutton = document.getElementById("btnLogin");

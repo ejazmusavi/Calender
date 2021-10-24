@@ -127,6 +127,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\bg.jpg" />
     <Content Include="Content\logo.jpg" />
     <Content Include="Report.aspx" />
     <Content Include="Contact.aspx" />
@@ -155,7 +156,6 @@
     <Content Include="Content\ej2\tailwind.css" />
     <Content Include="Content\main.css" />
     <Content Include="Content\Markazia-brands.png" />
-    <Content Include="Content\bg.jpg" />
     <Content Include="Content\Site.css" />
     <Content Include="Content\util.css" />
     <Content Include="Default.aspx" />

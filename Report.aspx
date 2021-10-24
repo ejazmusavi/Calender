@@ -126,10 +126,16 @@
             columns: [
                 { field: 'ApptDate', headerText: 'Appt. Date', width: 140, format: 'MMMM dd,  y' },
                 { field: 'Time', headerText: 'Appt. Time', width: 140 },//, format: 'hh:mm a'
-                { field: 'ServiceName', headerText: 'Service/Class', width: 140},
-                { field: 'CustomerName', headerText: 'Customer', width: 140 },
+                { field: 'ServiceName', headerText: 'Service/Class', width: 180},
+                { field: 'ResourceName', headerText: 'Resource Name', width: 180 },
+                { field: 'CustomerName', headerText: 'Customer Name', width: 180 },
                 { field: 'Mobile', headerText: 'Phone', width: 140 },
                 { field: 'Status', headerText: 'Status', width: 140 },
+                //Car	Year	Status	Comments	Booking Id	Booked From	Plate#	c
+                { field: 'Car', headerText: 'Car', width: 140 },
+                { field: 'Year', headerText: 'Year', width: 140 },
+                { field: 'Plate', headerText: 'Plate#', width: 140 },
+                { field: 'VIN', headerText: 'VIN#', width: 140 },
                 { field: 'AppointmentId', headerText: 'Booking ID', width: 140 }
             ]
         });
@@ -171,17 +177,18 @@
                 success: function (result, status, xhr) {
                     let data = result.Data.map(function (v) {
                         return {
-                            AppointmentId: v.AppointmentId, CustomerName: v.Customer.AccName, Mobile: v.Customer.AccMobile1,
-                            ServiceName: v.ServiceName, ApptDate: new Date(v.AppointmentDate), Status: v.Status, Time:v.Time
+                            AppointmentId: v.AppointmentId, ResourceName:v.ResourceName, CustomerName: v.Customer.AccName, Mobile: v.Customer.AccMobile1,
+                            ServiceName: v.ServiceName, ApptDate: new Date(v.AppointmentDate), Status: v.Status, Time: v.Time,
+                            Car: v.VehicleInfo?.Car, Year: v.VehicleInfo?.Year, Plate: v.VehicleInfo?.Plate, VIN:v.VehicleInfo?.VIN
                         };
                     });
-                    console.log(data);
                     grid.dataSource = data;
 
                     $(mybutton).css("opacity", "1");
                     $(mybutton).css("cursor", "pointer");
                     $(mybutton).removeAttr("disabled");
                     mybutton.innerHTML = "Generate Report";
+                    grid.autoFitColumns();
 
                 },
                 error: function (xhr, status, error) {

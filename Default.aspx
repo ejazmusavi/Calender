@@ -2,6 +2,21 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
+        #appt-loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,.2);
+            z-index: 99;
+            align-items: center;
+            display: grid;
+            padding: 10px;
+        }
+       .e-work-cells:not(.e-work-hours), .e-disableCell{
+            background-color:rgba(0,0,0,.2) !important;
+        }
         .e-canceled {
             background-color: red !important;
         }
@@ -116,7 +131,7 @@
 
             .profile-usermenu ul li {
                 border-bottom: 1px solid #f0f4f7;
-                padding: 2px 10px 2px 10px;
+                padding: 10px;
                 width: 100%;
                 float: left;
                 display: block;
@@ -186,7 +201,11 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
 
-
+                    <div id="appt-loader" style="display: none">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+                        </div>
+                    </div>
 
                     <div class="modal-body">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -199,6 +218,7 @@
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade  show active in" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                
                                 <input type="hidden" id="txtCenterId" value="0" />
                                 <input type="hidden" id="txtAppointmentId" value="0" />
 
@@ -217,7 +237,7 @@
                                 </div>
                                 <div class="form-group row">
 
-                                    <div class="col">
+                                    <div class="col" style="display:none">
                                         <div class="row">
                                             <label for="inputEmail3" class="col-sm-3 col-form-label">Duration</label>
                                             <div class="col-sm-9">
@@ -225,7 +245,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col">
                                         <div class="form-group row">
                                             <label for="inputEmail3" class="col-sm-3 col-form-label">Status</label>
                                             <div class="col-sm-9">
@@ -260,21 +280,22 @@
                                             </div>
                                         </div>
                                         <div class="profile-sidebar">
-                                            <!-- SIDEBAR USERPIC -->
+                                            <!-- SIDEBAR USERPIC
                                             <div class="profile-userpic">
                                                 <img src="https://i.picsum.photos/id/484/200/200.jpg?hmac=3rqhoyJTHVOGelhVPMaglcnpAMl_V3cvNkHZDpSz6_g" class="img-responsive" alt="">
-                                            </div>
+                                            </div> -->
 
                                             <!-- END SIDEBAR USERPIC -->
-                                            <!-- SIDEBAR USER TITLE -->
+                                            <!-- SIDEBAR USER TITLE
                                             <div class="profile-usertitle">
                                                 <div class="profile-usertitle-name" id="lblcustname">
                                                 </div>
-                                            </div>
+                                            </div> -->
                                             <!-- END SIDEBAR USER TITLE -->
                                             <!-- SIDEBAR MENU -->
                                             <div class="profile-usermenu">
                                                 <ul class="nav">
+                                                    <li>Name: <span id="lblcustname"></span></li>
                                                     <li>Mobile: <span id="lblmobile"></span></li>
                                                     <li>
                                                         <div class="form-group">
@@ -305,8 +326,8 @@
                     <div class="modal-footer">
                         <div class="w-100">
                             <label class="checkbox text-left">
-                                <input type="checkbox" class="checkbox" id="cbxReminder" />
-                                Send and email update to your staff and customer
+                                <input type="checkbox" class="checkbox" id="cbxReminder" checked />
+                                Send SMS reminder for Customer
                             </label>
                         </div>
                         <hr />
@@ -375,8 +396,13 @@
                         <div class="form-group row mt-3">
                             <label for="inputEmail3" class="col-sm-3 col-form-label">Vehicle No</label>
                             <div class="col-sm-9">
-
                                 <input type="text" id="VehicleNo" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="form-group row mt-3">
+                            <label for="inputEmail3" class="col-sm-3 col-form-label">Palette No</label>
+                            <div class="col-sm-9">
+                                <input type="text" id="PaletteNo" class="form-control" />
                             </div>
                         </div>
                         <div class="form-group row">
@@ -393,7 +419,12 @@
                                 </select>
                             </div>
                         </div>
-
+                        <div class="form-group row mt-3">
+                            <label for="inputEmail3" class="col-sm-3 col-form-label">Year</label>
+                            <div class="col-sm-9">
+                                <input type="text" id="ModelYear" class="form-control" />
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
 
@@ -552,9 +583,16 @@
 
             // initialize DatePicker component
             var datepicker = new ej.calendars.DateTimePicker();
-
+            datepicker.step = 1;
+            datepicker.firstDayOfWeek = 6;
+            datepicker.allowEdit = false;
+            datepicker.placeholder = 'Appointment date';
             // Render initialized DatePicker.
             datepicker.appendTo('#FromDateTime')
+            datepicker.renderDayCell = function (args) {
+                if (args.date.getDay() == 5) { args.isDisabled = true; }
+            }
+            
 
             var data = [];
             var scheduleObj = new ej.schedule.Schedule({
@@ -586,7 +624,6 @@
             scheduleObj.showSpinner();
             var ele;
             scheduleObj.eventRendered = function (args) {
-                console.log('rendered', args);
                 if (args.data.Status == 'Cancelled' || args.data.Status == 'Canceled') {
                     args.element.classList.add('e-canceled')
                 }
@@ -626,15 +663,13 @@
                             resourceWorkingHours.push({ dayIndex: workingDays[d.DayName] ?? 3, startHour: d.StartingHour, endHour: d.EndingHour });
                         });
                         var col = { Name: v.ServiceCenterName, Id: v.ServiceCenterId, workDays: resourceWorkingDays, workHours: resourceWorkingHours };
-                        console.log(col);
                         serviceCenterCollection.push(col);
-                        if (i == 0) {
                             scheduleObj.addResource(col, 'ServiceCenter', i);
-                            chk = 'checked';
+                        if (i == 0) {
                             if (col.workHours[0]?.startHour)
                                 scheduleObj.scrollTo(col.workHours[0].startHour.substr(0, 5));
                         }
-                        var html = '<div class="col-6 col-sm-4 col-md-3"><label> <input value="' + v.ServiceCenterId + '" ' + chk + ' class="e-resource-calendar e-personal" type="checkbox" onchange="onChange(this,\'' + v.ServiceCenterName + '\',' + i + ')" /> ' + v.ServiceCenterName + '</label></div>';
+                        var html = '<div class="col-6 col-sm-4 col-md-3"><label> <input value="' + v.ServiceCenterId + '" checked class="e-resource-calendar e-personal" type="checkbox" onchange="onChange(this,\'' + v.ServiceCenterName + '\',' + i + ')" /> ' + v.ServiceCenterName + '</label></div>';
                         $('#area-container').append(html);
 
                     });
@@ -698,7 +733,6 @@
                 }
             }
             scheduleObj.actionComplete = function (e) {
-                console.log('complete action',e);
                 if (e.requestType == 'dateNavigate' || e.requestType == 'viewNavigate') {
                     LoadEvents();
                 }
@@ -708,40 +742,19 @@
                 //    LoadEvents();
                 //}
             }
-            //scheduleObj.actionBegin = function actionBegin(e) {
-            //    console.log('action begin', e);
-
-            //    if (e.requestType === "eventRemove") {
-
-            //        //let url = "/Schedules/delete/";
-            //        //$.post(url, { id: e.data[0].Id }, function (data) {
-            //        //    if (data) {
-            //        //    }
-            //        //    else {
-            //        //        e.cancel = true;
-            //        //    }
-            //        //});
-            //    }
-            //    else if (e.requestType === "eventChange") {
-            //        //let url = "/Schedules/DragDrop/";
-            //        //$.post(url, { e: JSON.stringify(e.data) }, function (data) {
-            //        //    if (data) {
-            //        //    }
-            //        //    else {
-            //        //        e.cancel = true;
-            //        //    }
-            //        //});
-            //    }
-            //}
-            scheduleObj.popupOpen = function onPopupOpen(args) {
+            
+            scheduleObj.popupOpen = function (args) {
                 Reset();
                 var event = args.data;
                 if (args.target.classList.contains('e-disableCell') || !args.target.classList.contains('e-work-hours') & !event.Id) {
                     args.cancel = true;
                     return;
                 }
+                $('#appt-loader').show();
                 //$('.nav-tabs a[href="#home-tab"]').tab('show');
                 $('#myTab a:first').tab('show')
+                let time = new Date(new Date().toLocaleString());
+                datepicker.min = time;
                 datepicker.value = event.StartTime;
                 $('#txtCenterId').val(event.ServiceCenterId);
                 if (event.Id && event.Id > 0) {
@@ -779,9 +792,12 @@
                         });
 
                         $("#drpService").val(selectedValues).trigger('change');
+
+                        $('#appt-loader').hide();
                     },
                     error: function (xhr, status, error) {
                         //alert(xhr);
+                        $('#appt-loader').hide();
                     }
                 })
                 if (args.type == 'QuickInfo') {
@@ -805,11 +821,11 @@
             $("#drpService").on('change', function () {
 
                 $('#txtDuration').val(0);
-                let selected = $(this).select2('data');
-                let total = 0;
-                $.each(selected, function (i, v) {
-                    total += v.timeReq;
-                });
+                //let selected = $(this).select2('data');
+                let total = 15;
+                //$.each(selected, function (i, v) {
+                //    total += v.timeReq;
+                //});
                 $('#txtDuration').val(total);
 
             })
@@ -879,7 +895,6 @@
                             LabelId: $('#drpStatus').val()
                         };
                         var added = scheduleObj.addEvent(newEvent);
-                        console.log('event added', added);
                         Reset();
                         $("#response").html("<span class='alert alert-info text-info my-2 d-block'>Appointment Saved successfully.</span> ");
                         $(mybutton).css("opacity", "1");
@@ -929,6 +944,7 @@
                     data: [],
                     placeholder: 'Select Services'
                 });
+
                 $('#txtCenterId').val('');
                 $('#txtAppointmentId').val('');
 
@@ -936,7 +952,7 @@
                 $('#txtNotes').val('');
                 $('#txtCenterId').val('');
                 $('#search-customer').val('').trigger('change');
-                $('#cbxReminder').attr('checked', false);
+                $('#cbxReminder').prop('checked', true);
                 $('#drpVIN').html('').select2({
                     data: [],
                     placeholder: 'Select VIN'
@@ -1042,7 +1058,6 @@
                 options.dataType = "json";
 
                 options.success = function (response) {
-                    console.log(response);
                     if (response.Success) {
                         select2_search($('#search-customer'), response.Data);
                         $('#FirstName').val('');
@@ -1136,16 +1151,17 @@
                 model.VehicleNumber = $('#VehicleNo').val();
                 model.BrandId = $('#drpBrand').val();
                 model.ModelId = $('#drpModel').val();
-
-                console.log(model)
+                model.ModelYear = $('#ModelYear').val();
+                model.PlateNumber = $('#PaletteNo').val();
 
                 if (!model.AccountId) {
                     showError('Please select a Customer to continue.', mybutton, 'vin-response');
                     return false;
                 }
                 if (model.VehicleNumber == '') {
-                    showError('Please enter Vehicle Number to continue.', mybutton, 'vin-response');
-                    return false;
+                    //showError('Please enter Vehicle Number to continue.', mybutton, 'vin-response');
+                    //return false;
+                    model.VehicleNumber = GenerateFakeVin(11)
                 }
                 if (!model.BrandId) {
                     showError('Please select a Brand to continue.', mybutton, 'vin-response');
@@ -1185,6 +1201,20 @@
                     showError('Error occured while trying to save the VIN!.', mybutton, 'vin-response');
                 };
                 $.ajax(options);
+            }
+
+            function GenerateFakeVin(n) {
+                var add = 1, max = 12 - add;   // 12 is the min safe number Math.random() can generate without it starting to pad the end with zeros.   
+
+                if (n > max) {
+                    return GenerateFakeVin(max) + GenerateFakeVin(n - max);
+                }
+
+                max = Math.pow(10, n + add);
+                var min = max / 10; // Math.pow(10, n) basically
+                var number = Math.floor(Math.random() * (max - min + 1)) + min;
+
+                return ("" + number).substring(add);
             }
         </script>
     </div>

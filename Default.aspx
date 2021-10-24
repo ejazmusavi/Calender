@@ -592,7 +592,47 @@
             datepicker.renderDayCell = function (args) {
                 if (args.date.getDay() == 5) { args.isDisabled = true; }
             }
-            
+            datepicker.change = function (e) {
+                //var centerId = $('#txtCenterId').val();
+                //let date = e.value;
+                
+                //let workHours = serviceCenterCollection.find(function (v) { return v.Id == centerId; })?.workHours;
+                //var times = workHours.find(function (v) { return v.dayIndex == date.getDay() });
+
+                //let min = new Date(datepicker.min.setHours(times.startHour.substr(0, 2), times.startHour.substr(3, 4), 0, 0));// new Date(min.getYear(), min.getMonth(), min.getDate(), times.startHour, times.startHour)
+                //datepicker.min = min;
+                
+                //let max = new Date(datepicker.max.setHours(times.endHour.substr(0, 2), times.endHour.substr(3, 4), 0, 0));// new Date(min.getYear(), min.getMonth(), min.getDate(), times.startHour, times.startHour)
+                //console.log('max', max);
+                //datepicker.max = max;
+
+            }
+
+            datepicker.open = function (args) {
+                if (!args.popup.element.classList.contains('e-datepicker')) {
+                    let date = datepicker.value;
+                    var centerId = $('#txtCenterId').val();
+                    let workHours = serviceCenterCollection.find(function (v) { return v.Id == centerId; })?.workHours;
+                    var times = workHours.find(function (v) { return v.dayIndex == date.getDay() });
+
+                    //finding all the li elements in timepicker popup 
+                    var allItems = this.popupObject.element.children[0].querySelectorAll('.e-list-item');
+                    var minTimeObj = new Date('1/1/2019 ' + times.startHour); // generate timestamp of min time
+                    var minTime = +minTimeObj.getTime();
+                    var maxTimeObj = new Date('1/1/2019 ' + times.endHour);
+                    var maxTime = +maxTimeObj.getTime(); // generate timestamp of max time 
+                    for (var i = 0; i < allItems.length; i++) {
+                        var time = allItems[i].getAttribute('data-value');
+                        var tempObj = new Date("1/1/2019" + " " + time);
+                        var temp = +tempObj.getTime();
+                        //checking each li value with min and max time values 
+                        if (!((minTime <= temp) && (temp <= maxTime))) {
+                            //if the time values not in range then add in-built 'e-disabled' class to disable it 
+                            allItems[i].classList.add('e-disabled');
+                        }
+                    }
+                }
+            }
 
             var data = [];
             var scheduleObj = new ej.schedule.Schedule({
@@ -660,14 +700,14 @@
                         let resourceWorkingHours = [];
                         $.each(v.AptCenterWorkingDays, function (j, d) {
                             resourceWorkingDays.push(workingDays[d.DayName] ?? 3);
-                            resourceWorkingHours.push({ dayIndex: workingDays[d.DayName] ?? 3, startHour: d.StartingHour, endHour: d.EndingHour });
+                            resourceWorkingHours.push({ dayIndex: workingDays[d.DayName] ?? 3, startHour: d.StartingHour.substr(0, 5), endHour: d.EndingHour.substr(0, 5) });
                         });
                         var col = { Name: v.ServiceCenterName, Id: v.ServiceCenterId, workDays: resourceWorkingDays, workHours: resourceWorkingHours };
                         serviceCenterCollection.push(col);
                             scheduleObj.addResource(col, 'ServiceCenter', i);
                         if (i == 0) {
                             if (col.workHours[0]?.startHour)
-                                scheduleObj.scrollTo(col.workHours[0].startHour.substr(0, 5));
+                                scheduleObj.scrollTo(col.workHours[0].startHour);
                         }
                         var html = '<div class="col-6 col-sm-4 col-md-3"><label> <input value="' + v.ServiceCenterId + '" checked class="e-resource-calendar e-personal" type="checkbox" onchange="onChange(this,\'' + v.ServiceCenterName + '\',' + i + ')" /> ' + v.ServiceCenterName + '</label></div>';
                         $('#area-container').append(html);
@@ -727,7 +767,7 @@
                         var dayIndex = renderedDates[i].getDay();
                         let dayTimes = workHours1.find(function (v, i) { return v.dayIndex == dayIndex });
                         if (dayTimes) {
-                            scheduleObj.setWorkHours([renderedDates[i]], dayTimes.startHour.substr(0, 5), dayTimes.endHour.substr(0, 5), j);
+                            scheduleObj.setWorkHours([renderedDates[i]], dayTimes.startHour, dayTimes.endHour, j);
                         }
                     }
                 }
@@ -958,6 +998,9 @@
                     placeholder: 'Select VIN'
                 }).trigger('change');
 
+                $('#ModelYear').val('');
+                $('#PaletteNo').val('');
+
                 $('#lblmobile').html('');
                 $('#lblcustname').html('');
 
@@ -1146,24 +1189,45 @@
                 $(mybutton).css("cursor", "default");
                 $(mybutton).attr("disabled", "disabled");
                 mybutton.innerHTML = "Save changes &nbsp;<i style='font-size:20px;' class='fa fa-spinner fa-spin animated'></i>";
-                var model = {};
-                model.AccountId = parseInt($('#search-customer').val())
-                model.VehicleNumber = $('#VehicleNo').val();
-                model.BrandId = $('#drpBrand').val();
-                model.ModelId = $('#drpModel').val();
-                model.ModelYear = $('#ModelYear').val();
-                model.PlateNumber = $('#PaletteNo').val();
+                var model1 = {};
+                model1.AccountId = parseInt($('#search-customer').val())
+                model1.VehicleNumber = $('#VehicleNo').val();
+                model1.brandId = +$('#drpBrand').val();
+                model1.modelId = +$('#drpModel').val();
+                model1.ModelYear = +$('#ModelYear').val();
+                model1.plateNumber = $('#PaletteNo').val();
 
-                if (!model.AccountId) {
+                let model = {
+                    "userId": 0,
+                    "accountId": parseInt($('#search-customer').val()),
+                    "vehicleNumber": $('#VehicleNo').val(),
+                    "brandId": +$('#drpBrand').val(),
+                    "modelId": +$('#drpModel').val(),
+                    "modelYear": +$('#ModelYear').val(),
+                    "colorId": 0,
+                    "plateNumber": $('#PaletteNo').val(),
+                    "enginNo": "",
+                    "odo": 0,
+                    "usedToId": 0,
+                    "regD": 0,
+                    "regM": 0,
+                    "regCenterId": 0,
+                    "insurTypeId": 0,
+                    "insurCompId": 0,
+                    "licensePic": ""
+                }
+                console.log(model);
+                
+                if (!model.accountId) {
                     showError('Please select a Customer to continue.', mybutton, 'vin-response');
                     return false;
                 }
-                if (model.VehicleNumber == '') {
+                if (model.vehicleNumber == '') {
                     //showError('Please enter Vehicle Number to continue.', mybutton, 'vin-response');
                     //return false;
                     model.VehicleNumber = GenerateFakeVin(11)
                 }
-                if (!model.BrandId) {
+                if (!model.brandId) {
                     showError('Please select a Brand to continue.', mybutton, 'vin-response');
                     return false;
                 }
@@ -1183,6 +1247,11 @@
                     if (response.Success) {
                         $('#search-customer').trigger('change');
                         $('#VehicleNo').val('');
+                        $('#drpBrand').val('').trigger('change');
+                        //$('#drpModel').val();
+                        $('#ModelYear').val('');
+                        $('#PaletteNo').val('');
+
                         $("#vin-response").html("<span class='alert alert-info text-info my-2 d-block'>VIN Saved successfully.</span> ");
                         setTimeout(function () {
                             $("#vin-response").html("");

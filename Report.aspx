@@ -124,19 +124,19 @@
             allowPaging: true,
             pageSettings: { pageSizes: true, pageSize: 10 },
             columns: [
-                { field: 'ApptDate', headerText: 'Appt. Date', width: 140, format: 'MMMM dd,  y' },
-                { field: 'Time', headerText: 'Appt. Time', width: 140 },//, format: 'hh:mm a'
-                { field: 'ServiceName', headerText: 'Service/Class', width: 180},
-                { field: 'ResourceName', headerText: 'Resource Name', width: 180 },
-                { field: 'CustomerName', headerText: 'Customer Name', width: 180 },
-                { field: 'Mobile', headerText: 'Phone', width: 140 },
-                { field: 'Status', headerText: 'Status', width: 140 },
+                { field: 'ApptDate', headerText: 'Appt. Date', format: 'MMMM dd,  y', autoFit: true },
+                { field: 'Time', headerText: 'Appt. Time', autoFit: true },//, format: 'hh:mm a'
+                { field: 'ServiceName', headerText: 'Service/Class', autoFit: true},
+                { field: 'ResourceName', headerText: 'Resource Name', autoFit: true},
+                { field: 'CustomerName', headerText: 'Customer Name',autoFit:true },
+                { field: 'Mobile', headerText: 'Phone', autoFit: true},
+                { field: 'Status', headerText: 'Status', autoFit: true},
                 //Car	Year	Status	Comments	Booking Id	Booked From	Plate#	c
-                { field: 'Car', headerText: 'Car', width: 140 },
-                { field: 'Year', headerText: 'Year', width: 140 },
-                { field: 'Plate', headerText: 'Plate#', width: 140 },
-                { field: 'VIN', headerText: 'VIN#', width: 140 },
-                { field: 'AppointmentId', headerText: 'Booking ID', width: 140 }
+                { field: 'Car', headerText: 'Car', autoFit: true},
+                { field: 'Year', headerText: 'Year', autoFit: true},
+                { field: 'Plate', headerText: 'Plate#', autoFit: true},
+                { field: 'VIN', headerText: 'VIN#', autoFit: true},
+                { field: 'AppointmentId', headerText: 'Booking ID', autoFit: true}
             ]
         });
         grid.appendTo('#Grid');
@@ -179,7 +179,7 @@
                         return {
                             AppointmentId: v.AppointmentId, ResourceName:v.ResourceName, CustomerName: v.Customer.AccName, Mobile: v.Customer.AccMobile1,
                             ServiceName: v.ServiceName, ApptDate: new Date(v.AppointmentDate), Status: v.Status, Time: v.Time,
-                            Car: v.VehicleInfo?.Car, Year: v.VehicleInfo?.Year, Plate: v.VehicleInfo?.Plate, VIN:v.VehicleInfo?.VIN
+                            Car: v.VehicleInfo?.Brand, Year: v.VehicleInfo?.ModelYear, Plate: v.VehicleInfo?.PlateNo, VIN: v.VehicleInfo?.VinNo
                         };
                     });
                     grid.dataSource = data;

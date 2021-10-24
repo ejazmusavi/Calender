@@ -621,12 +621,15 @@
                     var minTime = +minTimeObj.getTime();
                     var maxTimeObj = new Date('1/1/2019 ' + times.endHour);
                     var maxTime = +maxTimeObj.getTime(); // generate timestamp of max time 
+                    let cdate = new Date();
+                    let ctime = new Date(2019, 0, 1, cdate.getHours(), cdate.getMinutes()).getTime();
+                    
                     for (var i = 0; i < allItems.length; i++) {
                         var time = allItems[i].getAttribute('data-value');
                         var tempObj = new Date("1/1/2019" + " " + time);
                         var temp = +tempObj.getTime();
                         //checking each li value with min and max time values 
-                        if (!((minTime <= temp) && (temp <= maxTime))) {
+                        if (!((minTime <= temp) && (temp <= maxTime)) || temp < ctime) {
                             //if the time values not in range then add in-built 'e-disabled' class to disable it 
                             allItems[i].classList.add('e-disabled');
                         }
@@ -669,7 +672,7 @@
                 }
             }
             scheduleObj.renderCell = function (args) {
-                if (args.date < new Date(new Date().setHours(0, 0, 0, 0))) {
+                if (args.date < new Date()) {
                     args.element.classList.add('e-disableCell');
                 }
             }

@@ -525,7 +525,7 @@
                 $(location).attr("href", '/Login');
             }
             var base = 'http://api.markaziasystems.com/api/v1/';
-            //base = 'http://localhost:4500/api/v1/';
+            base = 'http://localhost:4500/api/v1/';
             let serviceCenterCollection = [];
             let autoSearch = false;
             function select2_search($el, term) {
@@ -712,15 +712,30 @@
                     var minTime = +minTimeObj.getTime();
                     var maxTimeObj = new Date('1/1/2019 ' + times.endHour);
                     var maxTime = +maxTimeObj.getTime(); // generate timestamp of max time 
-                    let cdate = new Date();
-                    let ctime = new Date(2019, 0, 1, cdate.getHours(), cdate.getMinutes()).getTime();
-                    
+                    let ctime = (new Date()).getTime();
+                    //let ctime = new Date(2019, 0, 1, cdate.getHours(), cdate.getMinutes()).getTime();
+
+                    let selectedDate = moment(datepicker.value);
+                    //get current time
+                    //
                     for (var i = 0; i < allItems.length; i++) {
+
                         var time = allItems[i].getAttribute('data-value');
+                        var time2 = moment(time, 'HH:mm A');
+
+                        let selectedDateTime = selectedDate.set({
+                            hour: time2.get('hour'),
+                            minute: time2.get('minute'),
+                            second: 0
+                        }).toDate().getTime();
+
+                        console.log(time,new Date(selectedDateTime)< new Date(ctime));
+
                         var tempObj = new Date("1/1/2019" + " " + time);
                         var temp = +tempObj.getTime();
-                        //checking each li value with min and max time values 
-                        if (!((minTime <= temp) && (temp <= maxTime)) || temp < ctime) {
+                        
+                        //checking each li value with min and max time values
+                        if (!((minTime <= temp) && (temp <= maxTime)) || selectedDateTime < ctime) {
                             //if the time values not in range then add in-built 'e-disabled' class to disable it 
                             allItems[i].classList.add('e-disabled');
                         }
@@ -740,6 +755,7 @@
                 endHour: '22:00',
                 workDays: [0, 1, 2, 3, 4, 6],
                 firstDayOfWeek: 5,
+                timezone:'UTC',
                 timeScale: {
                     enable: true,
                     interval: 60,
@@ -1414,6 +1430,7 @@
                 options.success = function (response) {
                     if (response.Success) {
                         $('#search-customer').trigger('change');
+                        $('#search-customer').trigger('select2:select');
                         $('#VehicleNo').val('');
                         $('#drpBrand').val('').trigger('change');
                         //$('#drpModel').val();

@@ -46,7 +46,7 @@
             padding-bottom: 0;
         }
 
-        .input-group .select2-container {
+     .search-customer .input-group .select2-container {
             min-width: calc(100% - 127px);
         }
 
@@ -293,10 +293,37 @@
                                             </div> -->
                                             <!-- END SIDEBAR USER TITLE -->
                                             <!-- SIDEBAR MENU -->
+                                            <style>
+                                                #customer-info .label{
+                                                    display:initial;
+                                                } 
+                                                #customer-info.edit .label{
+                                                    display:none;
+                                                } 
+                                                #customer-info .edit{
+                                                    display:none;
+                                                } 
+                                                #customer-info.edit .edit-icon{
+                                                    display:none;
+                                                }
+                                                #customer-info.edit .edit{
+                                                    display:initial;
+                                                } 
+                                                #customer-info.edit lalbel{
+                                                    display:none;
+                                                } 
+                                            </style>
                                             <div class="profile-usermenu">
-                                                <ul class="nav">
+                                                <ul class="nav" id="customer-info">
                                                     <li>Name: <span id="lblcustname"></span></li>
-                                                    <li>Mobile: <span id="lblmobile"></span></li>
+                                                    <li>Mobile 1: <span class="label" id="lblmobile"></span>
+                                                        <input type="text" class="edit ml-3" id="txtEditMobile1" />
+                                                        <span class="fa fa-pencil float-right mr-2 edit-icon" onclick="customerEdit()"></span></li>
+                                                    <li>Mobile 2: <span class="label" id="lblmobile2"></span>
+                                                        <input type="text" class="edit ml-3" id="txtEditMobile2" />
+                                                        <button type="button" id="edit-mobile-btn" class="edit mr-2" onclick="saveMobile()">Save</button>
+                                                        <button type="button" id="cancel-mobile" class="edit" onclick="cancelMobile()">Cancel</button>
+                                                    </li>
                                                     <li>
                                                         <div class="form-group">
                                                             <label>Select VIN</label>
@@ -437,13 +464,68 @@
         </div>
         <script>
 
-            
+            function customerEdit() {
+                $('#customer-info').addClass('edit');
+                $('#txtEditMobile1').val($('#lblmobile').html())
+                $('#txtEditMobile2').val($('#lblmobile2').html());
+            }
+            function cancelMobile() {
+                $('#customer-info').removeClass('edit')
+                $('#txtEditMobile1').val($('#lblmobile').html())
+                $('#txtEditMobile2').val($('#lblmobile2').html());
+            }
+            function saveMobile() {
+                var mybutton = document.getElementById("edit-mobile-btn");
+                $(mybutton).css("opacity", "0.5");
+                $(mybutton).css("cursor", "default");
+                $(mybutton).attr("disabled", "disabled");
+                mybutton.innerHTML = "Save &nbsp;<i style='font-size:20px;' class='fa fa-spinner faa-spin animated'></i>";
+
+
+                var selected = $('#search-customer').select2('data')[0];
+                if (!selected) {
+                    showError('Please select a customer to continue.', mybutton, 'response','Save');
+                    return false;
+                }
+                let model = {
+                    AccountId: selected.id, Mobile1: $('#txtEditMobile1').val(), Mobile2: $('#txtEditMobile2').val()
+                };
+                
+                var options = {};
+                options.url = base + "Appointments/SC_CustomerMobileUpdate_Appointment";
+                options.type = "POST";
+                options.headers = {
+                    'Access-Control-Allow-Headers': 'Authorization',
+                    'Authorization': 'Bearer ' + token
+                }
+                options.data = JSON.stringify(model);
+                options.contentType = "application/json";
+                options.dataType = "json";
+                
+                options.success = function (response) {
+                    if (response.Success) {
+                        $('#lblmobile').html(model.Mobile1);
+                        $('#lblmobile2').html(model.Mobile2);
+                        $(mybutton).css("opacity", "1");
+                        $(mybutton).css("cursor", "pointer");
+                        $(mybutton).removeAttr("disabled");
+                        $('#customer-info').removeClass('edit')
+                    }
+                    else {
+                        showError('Customer mobile cannot be changed. Please try again later.', mybutton, 'response', 'Save');
+                    }
+                };
+                options.error = function (response) {
+                    showError('Customer mobile cannot be changed. Please try again later.', mybutton, 'response', 'Save');
+                    }
+                $.ajax(options);
+            }
             let token = localStorage.getItem("token");
             if (!token || token == '') {
                 $(location).attr("href", '/Login');
             }
             var base = 'http://api.markaziasystems.com/api/v1/';
-            //base = 'http://localhost:4500/api/v1/';
+            base = 'http://localhost:4500/api/v1/';
             let serviceCenterCollection = [];
             let autoSearch = false;
             function select2_search($el, term) {
@@ -475,29 +557,35 @@
                             SearchTerm: params.term,
                             type: 'public'
                         }
-
                         // Query parameters will be ?SearchTerm=[term]&type=public
                         return query;
                     },
                     processResults: function (data) {
+                        var data6 = data.Data.Result.map(function (v) { return { id: v.AccId, text: v.AccName, name: v.AccName, mobile: v.AccMobile1, mobile2: v.AccMobile2 }; });
                         if (autoSearch) {
-                            setTimeout(function () { $('#select2-search-customer-results .select2-results__option').trigger("mouseup") }, 300);
+                            setTimeout(function () { $('#select2-search-customer-results .select2-results__option').trigger("mouseup") }, 100);
                         }
                         autoSearch = false;
                         return {
-                            results: data.Data.Result.map(function (v) { return { id: v.AccId, text: v.AccName, name: v.AccName, mobile: v.AccMobile1 }; })
+                            results: data.Data.Result.map(function (v) { return { id: v.AccId, text: v.AccName, name: v.AccName, mobile: v.AccMobile1, mobile2: v.AccMobile2 }; })
                         }
                     }
                 }
             });
+            $('#search-customer').on('select2:select', function (e) {
+                // Do something
+                console.log('new select event', e.params.data)
+                var selected = e.params.data;// $(this).select2('data')[0];
 
-            drpCustomer.on('change', function () {
-                var selected = $(this).select2('data')[0];
                 if (selected) {
+                    
                     var id = selected.id;
                     $('#lblcustname').html(selected.name);
                     $('#lblmobile').html(selected.mobile);
-
+                    $('#lblmobile2').html(selected.mobile2);
+                    $('#txtEditMobile1').val(selected.mobile);
+                   $('#txtEditMobile2').val(selected.mobile2);
+                    
                     $.ajax(
                         {
                             url: base + 'Customers/SC_GetCustomersVins?CustomerId=' + id,
@@ -508,9 +596,9 @@
                             },
                             dataType: 'json',
                             success: function (result, status, xhr) {
-                                let data = result.Data.Result.map(function (v) { return { id: v.VinId, text: v.VinNo + ', ' + v.Brand + ', ' + v.ModelName }; });
+                                let data3 = result.Data.Result.map(function (v) { return { id: v.VinId, text: v.VinNo + ', ' + v.PlateNo + ', ' + v.Brand + ', ' + v.ModelName }; });
                                 $("#drpVIN").select2({
-                                    data: data
+                                    data: data3
                                 })
                                 if (VINId > 0)
                                     $('#drpVIN').val(VINId).trigger('change');
@@ -522,13 +610,31 @@
                     )
                 }
                 else {
+                    console.log(selected);
+                    alert('else');
                     $('#lblcustname').html('');
                     $('#lblmobile').html('');
+                    $('#lblmobile2').html('');
+                    $('#txtEditMobile1').val('');
+                    $('#txtEditMobile2').val('');
+
+                    $('#customer-info').removeClass('edit')
                     $("#drpVIN").html('').select2({
                         data: [],
                         placeholder: 'Select VIN'
                     });
                 }
+            });
+            $('#search-customer').on('change', function (e) {
+                $('#lblcustname').html('');
+                $('#lblmobile').html('');
+                $('#lblmobile2').html('');
+                $('#txtEditMobile1').val('');
+                $('#txtEditMobile2').val('');
+
+                $('#customer-info').removeClass('edit')
+
+                
             });
 
             function LoadEvents() {
@@ -583,7 +689,7 @@
 
             // initialize DatePicker component
             var datepicker = new ej.calendars.DateTimePicker();
-            datepicker.step = 1;
+            datepicker.step = 15;
             datepicker.firstDayOfWeek = 6;
             datepicker.allowEdit = false;
             datepicker.placeholder = 'Appointment date';
@@ -591,21 +697,6 @@
             datepicker.appendTo('#FromDateTime')
             datepicker.renderDayCell = function (args) {
                 if (args.date.getDay() == 5) { args.isDisabled = true; }
-            }
-            datepicker.change = function (e) {
-                //var centerId = $('#txtCenterId').val();
-                //let date = e.value;
-                
-                //let workHours = serviceCenterCollection.find(function (v) { return v.Id == centerId; })?.workHours;
-                //var times = workHours.find(function (v) { return v.dayIndex == date.getDay() });
-
-                //let min = new Date(datepicker.min.setHours(times.startHour.substr(0, 2), times.startHour.substr(3, 4), 0, 0));// new Date(min.getYear(), min.getMonth(), min.getDate(), times.startHour, times.startHour)
-                //datepicker.min = min;
-                
-                //let max = new Date(datepicker.max.setHours(times.endHour.substr(0, 2), times.endHour.substr(3, 4), 0, 0));// new Date(min.getYear(), min.getMonth(), min.getDate(), times.startHour, times.startHour)
-                //console.log('max', max);
-                //datepicker.max = max;
-
             }
 
             datepicker.open = function (args) {
@@ -641,7 +732,8 @@
             var scheduleObj = new ej.schedule.Schedule({
                 height: '550px',
                 selectedDate: new Date(),
-                allowDragAndDrop:false,
+                allowDragAndDrop: true,
+                allowResizing:false,
                 views: ['Day', 'Week', 'TimelineWeek', 'Month', 'Agenda'],
                 eventSettings: { dataSource: data },
                 startHour: '08:00',
@@ -676,6 +768,71 @@
                     args.element.classList.add('e-disableCell');
                 }
             }
+
+            //drag to hold the last drop data to reset if ajax request failed
+            let drag;
+            scheduleObj.dragStart = function (e) {
+                drag = e.data;
+            }
+            scheduleObj.dragStop = function (e) {
+                if (e.event.element.dataset.groupIndex !== e.event.target.dataset.groupIndex) {
+                    e.cancel = true;
+                    return;
+                }
+                if (e.target.classList.contains('e-disableCell') || !e.target.classList.contains('e-work-hours')) {
+                    e.cancel = true;
+                    return;
+                }
+
+                var model = {};
+                model.AppointmentId = e.data.Id;
+                model.AppointmentDate = e.data.StartTime;
+
+                var options = {};
+                options.url = base + "Appointments/SC_ModifyDateTime_Appointment";
+                options.type = "POST";
+                options.headers = {
+                    'Access-Control-Allow-Headers': 'Authorization',
+                    'Authorization': 'Bearer ' + token
+                }
+                options.data = JSON.stringify(model);
+                options.contentType = "application/json";
+                options.dataType = "json";
+                options.beforeSend = function () {
+                    setTimeout(function () {
+                        scheduleObj.showSpinner();
+                    }, 100);
+                }
+                options.success = function (response) {
+                    setTimeout(function () {
+                        scheduleObj.hideSpinner();
+                    }, 100);
+                    if (response.Success) {
+                        
+                    }
+                    else {    
+                        alert(response.Data)
+                        scheduleObj.deleteEvent(e.data);
+                        scheduleObj.addEvent(drag);
+                        if (response.Data == 'max_appointment') {
+                            alert('No space in timeslot.');
+                        }
+                    }
+                };
+                options.error = function (response) {
+                    setTimeout(function () {
+                        scheduleObj.hideSpinner();
+                    }, 100);
+
+                    scheduleObj.deleteEvent(e.data);
+                    scheduleObj.addEvent(drag);
+                    if (response.responseJSON.Data == 'max_appointment') {
+                        alert('No space in timeslot.');
+                    }
+                }
+                $.ajax(options);
+            }
+
             var workingDays = [];
             workingDays["Sunday"] = 0;
             workingDays["Monday"] = 1;
@@ -784,8 +941,7 @@
                 //if (e.action == 'date' || e.action == 'view') {
                 //    LoadEvents();
                 //}
-            }
-            
+            }         
             scheduleObj.popupOpen = function (args) {
                 Reset();
                 var event = args.data;
@@ -796,8 +952,9 @@
                 $('#appt-loader').show();
                 //$('.nav-tabs a[href="#home-tab"]').tab('show');
                 $('#myTab a:first').tab('show')
-                let time = new Date(new Date().toLocaleString());
-                datepicker.min = time;
+                let date = new Date();
+                let time = date.setHours(0, 0, 0);
+                datepicker.min = new Date(time);
                 datepicker.value = event.StartTime;
                 $('#txtCenterId').val(event.ServiceCenterId);
                 if (event.Id && event.Id > 0) {
@@ -881,10 +1038,10 @@
                 mybutton.innerHTML = "Save changes &nbsp;<i style='font-size:20px;' class='fa fa-spinner faa-spin animated'></i>";
                 var model = {};
                 model.AppointmentId = parseInt($('#txtAppointmentId').val());
+                model.AppointmentDate = datepicker.value;
                 model.CustomerID = parseInt($('#search-customer').val());
                 model.CenterID = parseInt($('#txtCenterId').val());
                 model.VINID = parseInt($('#drpVIN').val());
-                model.AppointmentDate = datepicker.value;
                 model.SendReminder = $('#cbxReminder').is(':checked');
                 model.LabelId = $('#drpStatus').val();
                 model.Notes = $('#txtNotes').val();
@@ -906,6 +1063,7 @@
                     showError('Please atlease One Service to continue.', mybutton);
                     return false;
                 }
+
                 var options = {};
                 options.url = base + (model.AppointmentId > 0 ? "Appointments/SC_Edit_Appointment" : "Appointments/SC_Add_Appointment");
                 options.type = "POST";
@@ -951,14 +1109,21 @@
                     }
                 };
                 options.error = function () {
-                    showError('Error occured while trying to save the appointment!.', mybutton);
+                    if (response.Data == 'max_appointment' || response.responseJSON.Data == 'max_appointment') {
+                        showError('No space in timeslot.', mybutton);
+                    }
+                    else
+                        showError('Error occured while trying to save the appointment!.', mybutton);
                 };
                 $.ajax(options);
             }
 
-            function showError(message, mybutton, errorcontainer) {
+            function showError(message, mybutton, errorcontainer, buttontext) {
                 if (!errorcontainer || errorcontainer == '')
                     errorcontainer = 'response';
+                if (!buttontext || buttontext == '')
+                    buttontext = 'Save changes';
+
                 $("#" + errorcontainer + "").html("<span class='alert alert-danger text-danger my-2 d-block' >" + message + "</span> ");
                 setTimeout(function () {
                     $("#" + errorcontainer + "").html("");
@@ -967,7 +1132,7 @@
                 $(mybutton).css("opacity", "1");
                 $(mybutton).css("cursor", "pointer");
                 $(mybutton).removeAttr("disabled");
-                mybutton.innerHTML = "Save changes";
+                mybutton.innerHTML = buttontext;
             }
 
             function Reset() {
@@ -1228,7 +1393,7 @@
                 if (model.vehicleNumber == '') {
                     //showError('Please enter Vehicle Number to continue.', mybutton, 'vin-response');
                     //return false;
-                    model.VehicleNumber = GenerateFakeVin(11)
+                    model.VehicleNumber = "TempVin-" + GenerateFakeVin(9);
                 }
                 if (!model.brandId) {
                     showError('Please select a Brand to continue.', mybutton, 'vin-response');

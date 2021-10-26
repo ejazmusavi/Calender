@@ -457,7 +457,7 @@
 
                         <div class="w-100" id="vin-response"></div>
                         <button type="button" class="btn btn-primary" id="btnSaveVIN" onclick="SaveVIN()">Save changes</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetVIN()" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -573,19 +573,33 @@
                 }
             });
             $('#search-customer').on('select2:select', function (e) {
-                // Do something
-                console.log('new select event', e.params.data)
                 var selected = e.params.data;// $(this).select2('data')[0];
+                LoadVins(selected);
+                
+            });
+            $('#search-customer').on('change', function (e) {
+                $('#lblcustname').html('');
+                $('#lblmobile').html('');
+                $('#lblmobile2').html('');
+                $('#txtEditMobile1').val('');
+                $('#txtEditMobile2').val('');
 
+                $('#customer-info').removeClass('edit')
+
+                
+            });
+
+            function LoadVins(selected)
+            {
                 if (selected) {
-                    
+
                     var id = selected.id;
                     $('#lblcustname').html(selected.name);
                     $('#lblmobile').html(selected.mobile);
                     $('#lblmobile2').html(selected.mobile2);
                     $('#txtEditMobile1').val(selected.mobile);
-                   $('#txtEditMobile2').val(selected.mobile2);
-                    
+                    $('#txtEditMobile2').val(selected.mobile2);
+
                     $.ajax(
                         {
                             url: base + 'Customers/SC_GetCustomersVins?CustomerId=' + id,
@@ -610,8 +624,6 @@
                     )
                 }
                 else {
-                    console.log(selected);
-                    alert('else');
                     $('#lblcustname').html('');
                     $('#lblmobile').html('');
                     $('#lblmobile2').html('');
@@ -624,19 +636,7 @@
                         placeholder: 'Select VIN'
                     });
                 }
-            });
-            $('#search-customer').on('change', function (e) {
-                $('#lblcustname').html('');
-                $('#lblmobile').html('');
-                $('#lblmobile2').html('');
-                $('#txtEditMobile1').val('');
-                $('#txtEditMobile2').val('');
-
-                $('#customer-info').removeClass('edit')
-
-                
-            });
-
+            }
             function LoadEvents() {
                 scheduleObj.showSpinner();
                 if (scheduleObj.eventsData.length > 0) {
@@ -729,7 +729,6 @@
                             second: 0
                         }).toDate().getTime();
 
-                        console.log(time,new Date(selectedDateTime)< new Date(ctime));
 
                         var tempObj = new Date("1/1/2019" + " " + time);
                         var temp = +tempObj.getTime();
@@ -827,11 +826,10 @@
                         
                     }
                     else {    
-                        alert(response.Data)
                         scheduleObj.deleteEvent(e.data);
                         scheduleObj.addEvent(drag);
                         if (response.Data == 'max_appointment') {
-                            alert('No space in timeslot.');
+                            alert('Reached the maximum number of appointments in that time slot.');
                         }
                     }
                 };
@@ -843,7 +841,7 @@
                     scheduleObj.deleteEvent(e.data);
                     scheduleObj.addEvent(drag);
                     if (response.responseJSON.Data == 'max_appointment') {
-                        alert('No space in timeslot.');
+                        alert('Reached the maximum number of appointments in that time slot.');
                     }
                 }
                 $.ajax(options);
@@ -1124,9 +1122,9 @@
                         showError('Error occured while trying to save the appointment!.', mybutton);
                     }
                 };
-                options.error = function () {
+                options.error = function (response) {
                     if (response.Data == 'max_appointment' || response.responseJSON.Data == 'max_appointment') {
-                        showError('No space in timeslot.', mybutton);
+                        showError('Reached the maximum number of appointments in that time slot.', mybutton);
                     }
                     else
                         showError('Error occured while trying to save the appointment!.', mybutton);
@@ -1365,7 +1363,16 @@
                 );
 
             })
+            $('#diallog-vin').on('hidden.bs.modal', function () {
+                resetVIN();
+            })
+            function resetVIN() {
 
+                $('#VehicleNo').val('');
+                $('#drpBrand').val('').trigger('change');
+                $('#ModelYear').val('');
+                $('#PaletteNo').val('');
+            }
             function SaveVIN() {
 
                 var mybutton = document.getElementById("btnSaveVIN");
@@ -1400,7 +1407,6 @@
                     "insurCompId": 0,
                     "licensePic": ""
                 }
-                console.log(model);
                 
                 if (!model.accountId) {
                     showError('Please select a Customer to continue.', mybutton, 'vin-response');
@@ -1429,14 +1435,7 @@
 
                 options.success = function (response) {
                     if (response.Success) {
-                        $('#search-customer').trigger('change');
-                        $('#search-customer').trigger('select2:select');
-                        $('#VehicleNo').val('');
-                        $('#drpBrand').val('').trigger('change');
-                        //$('#drpModel').val();
-                        $('#ModelYear').val('');
-                        $('#PaletteNo').val('');
-
+                        resetVIN();
                         $("#vin-response").html("<span class='alert alert-info text-info my-2 d-block'>VIN Saved successfully.</span> ");
                         setTimeout(function () {
                             $("#vin-response").html("");
@@ -1446,6 +1445,10 @@
                         $(mybutton).css("cursor", "pointer");
                         $(mybutton).removeAttr("disabled");
                         mybutton.innerHTML = "Save changes";
+                        $('#search-customer').trigger('change');
+                        var selected = $('#search-customer').select2('data')[0];
+                        LoadVins(selected);
+
                     }
                     else {
                         showError('Error occured while trying to save the VIN!.', mybutton, 'vin-response');

@@ -602,7 +602,7 @@
 
                     $.ajax(
                         {
-                            url: base + 'Customers/SC_GetCustomersVins?CustomerId=' + id,
+                            url: base + 'Customers/SC_GetCustomersVins?PageSize=100&CustomerId=' + id,
                             type: "GET",
                             headers: {
                                 'Access-Control-Allow-Headers': 'Authorization',

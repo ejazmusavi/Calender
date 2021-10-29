@@ -677,8 +677,10 @@
                             }
                         });
                         for (var i = 0; i < events.length; i++) {
-                            let e = evetns[i];
+                            let e = events[i];
+                            console.log(e);
                             let exist = scheduleObj.eventsData.find(function (v) { return v.Id == e.Id; })
+                            console.log(exist);
                             if (!exist)
                                 scheduleObj.addEvent(e);
                         }

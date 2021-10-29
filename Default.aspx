@@ -676,7 +676,12 @@
                                 LabelId: v.LabelId
                             }
                         });
-                        scheduleObj.addEvent(events);
+                        for (var i = 0; i < events.length; i++) {
+                            let e = evetns[i];
+                            let exist = scheduleObj.eventsData.find(function (v) { return v.Id == e.Id; })
+                            if (!exist)
+                                scheduleObj.addEvent(e);
+                        }
                         //scheduleObj.hideSpinner();
 
                     },
@@ -985,9 +990,10 @@
                 else {
                     $('#btnDelete').hide();
                 }
+                ///api/v1/Appointments/SC_Apt_GetServices
                 $.ajax({
                     type: "GET",
-                    url: base + 'ServiceCenterWorkshops/SC_WS_GetServices?CenterId=' + args.data.ServiceCenterId,
+                    url: base + 'Appointments/SC_Apt_GetServices?CenterId=' + args.data.ServiceCenterId,
                     headers: {
                         'Access-Control-Allow-Headers': 'Authorization',
                         'Authorization': 'Bearer ' + token

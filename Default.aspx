@@ -429,7 +429,7 @@
                     <div class="w-100" id="customer-response"></div>
 
                     <button type="button" class="btn btn-primary" id="btnSaveCustomer" onclick="SaveCustomer()">Save changes</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" id="btnCloseCustomer-diallog" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -451,7 +451,7 @@
                         </div>
                     </div>
                     <div class="form-group row mt-3">
-                        <label for="inputEmail3" class="col-sm-3">Plette No</label>
+                        <label for="inputEmail3" class="col-sm-3">Plate No</label>
                         <div class="col-sm-9">
                             <input type="text" id="PaletteNo" class="form-control" />
                         </div>
@@ -481,7 +481,7 @@
 
                     <div class="w-100" id="vin-response"></div>
                     <button type="button" class="btn btn-primary" id="btnSaveVIN" onclick="SaveVIN()">Save changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="resetVIN()" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" id="btnCloseVIN" onclick="resetVIN()" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -569,20 +569,16 @@
             }
             let mobile1 = $('#txtEditMobile1').val();
             let mobile2 = $('#txtEditMobile2').val();
-            console.log(mobileValidations)
             var isMatch = mobileValidations.some(function (rx) { return rx.test(mobile2) });
             var isMatch2 = mobileValidations.some(function (rx) { return rx.test(mobile2); });
             if (!isMatch & mobile1 != '') {
                 showError('Please enter a valid mobile no in Mobile 1.', mybutton, 'response', 'Save');
+                return false;
             }
             if (!isMatch2 & mobile2 != '') {
                 showError('Please enter a valid mobile no in Mobile 2.', mybutton, 'response', 'Save');
-
+                return false;
             }
-            showError('Success! ', mybutton, 'response', 'Save');
-
-            console.log(mobileValidations, isMatch, isMatch2);
-            return;
             let model = {
                 AccountId: selected.id, Mobile1: mobile1, Mobile2: mobile2
             };
@@ -673,7 +669,7 @@
                 $('#lblmobile2').html(selected.mobile2);
                 $('#txtEditMobile1').val(selected.mobile);
                 $('#txtEditMobile2').val(selected.mobile2);
-
+                $("#drpVIN").html('').select2();
                 let sucess = function (result, status, xhr) {
                     let data3 = result.Data.Result.map(function (v) { return { id: v.VinId, text: v.VinNo + ', ' + v.PlateNo + ', ' + v.Brand + ', ' + v.ModelName }; });
                     $("#drpVIN").select2({
@@ -1359,6 +1355,11 @@
             model.LastName = $('#LastName').val();
             model.Mobile = $('#Mobile').val();
 
+            var isMatch = mobileValidations.some(function (rx) { return rx.test(model.Mobile) });
+            if (!isMatch & model.Mobile != '') {
+                showError('Please enter a valid mobile no.', mybutton, 'customer-response', 'Save');
+                return false;
+            }
             if (!model.FirstName) {
                 showError('Please enter First name to continue.', mybutton, 'customer-response');
                 return false;
@@ -1387,15 +1388,22 @@
                 if (response.Success) {
                     select2_search($('#search-customer'), response.Data);
                     LoadVins(null);
-                    $("#customer-response").html("<span class='alert alert-info text-info my-2 d-block'>Customer Saved successfully.</span> ");
+                    $("#response").html("<span class='alert alert-info text-info my-2 d-block'>Customer Saved successfully.</span> ");
                     setTimeout(function () {
-                        $("#customer-response").html("");
+                        $("#response").html("");
                     }, 5000);
+
+                    $('#FirstName').val('');
+                    $('#LastName').val('');
+                    $('#Mobile').val('');
 
                     $(mybutton).css("opacity", "1");
                     $(mybutton).css("cursor", "pointer");
                     $(mybutton).removeAttr("disabled");
                     mybutton.innerHTML = "Save changes";
+                    setTimeout(function () {
+                        $('#btnCloseCustomer-diallog').trigger('click');
+                    }, 200);
                 }
                 else {
                     showError('Error occured while trying to save the Customer!.', mybutton, 'customer-response');
@@ -1535,9 +1543,9 @@
             options.success = function (response) {
                 if (response.Success) {
                     resetVIN();
-                    $("#vin-response").html("<span class='alert alert-info text-info my-2 d-block'>VIN Saved successfully.</span> ");
+                    $("#response").html("<span class='alert alert-info text-info my-2 d-block'>VIN Saved successfully.</span> ");
                     setTimeout(function () {
-                        $("#vin-response").html("");
+                        $("#response").html("");
                     }, 5000);
 
                     $(mybutton).css("opacity", "1");
@@ -1547,7 +1555,7 @@
                     $('#search-customer').trigger('change');
                     var selected = $('#search-customer').select2('data')[0];
                     LoadVins(selected);
-
+                    $('#btnCloseVIN').trigger('click');
                 }
                 else {
                     showError('Error occured while trying to save the VIN!.', mybutton, 'vin-response');

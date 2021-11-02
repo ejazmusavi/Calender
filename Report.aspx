@@ -22,7 +22,7 @@
             </div>
             <div class="col-12 col-md-3">
                 <div class="form-group row no-gutters">
-                                    <label for="inputEmail3" class="col-sm-12">Centers</label>
+                                    <label for="inputEmail3" class="col-sm-12">Center</label>
                                     <div class="col-sm-9">
                                         <select class="form-control" id="drpCenter" name="Service" >
                                         </select>

@@ -3,10 +3,10 @@
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
        #home .control-label{
-            margin-bottom:2px;
+            margin-bottom:4px;
         }
        #home .form-group{
-            margin-bottom:5px;
+            margin-bottom:10px;
         }
         #appt-loader {
             position: absolute;
@@ -238,7 +238,7 @@
                                             </select>
                                 </div>
                                 <div class="col">
-                                        <label for="inputEmail3" class="control-label">Type</label>
+                                        <label for="inputEmail3" class="control-label">Appointment Type</label>
                                             <select class="form-control select2" id="drpSource" name="Service" >
                                             </select>
                                 </div>
@@ -255,7 +255,7 @@
                                     <input type="email" class="form-control" id="FromDateTime" placeholder="date and time">
                                 
                                 </div>
-                                <div class="col">
+                                <div class="col" style="display:none">
                                      <label for="inputEmail3" class="control-label">Duration</label>
                                      <input type="text" class="form-control" value="0" readonly id="txtDuration" name="TotalDuration" />   
                                 </div>
@@ -445,33 +445,33 @@
                 <div class="modal-body ">
 
                     <div class="form-group row mt-3">
-                        <label for="inputEmail3" class="col-sm-3">Vehicle No</label>
+                        <label for="inputEmail3" class="col-sm-3">VIN</label>
                         <div class="col-sm-9">
                             <input type="text" id="VehicleNo" class="form-control" />
                         </div>
                     </div>
                     <div class="form-group row mt-3">
-                        <label for="inputEmail3" class="col-sm-3">Palette No</label>
+                        <label for="inputEmail3" class="col-sm-3">Plette No</label>
                         <div class="col-sm-9">
                             <input type="text" id="PaletteNo" class="form-control" />
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="inputEmail3" class="col-sm-3">Brand</label>
+                        <label for="inputEmail3" class="col-sm-3">Brand Name</label>
                         <div class="col-sm-9">
                             <select class="form-control" id="drpBrand" name="Service">
                             </select>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="inputEmail3" class="col-sm-3">Model</label>
+                        <label for="inputEmail3" class="col-sm-3">Model Name</label>
                         <div class="col-sm-9">
                             <select class="form-control" id="drpModel" name="Service">
                             </select>
                         </div>
                     </div>
                     <div class="form-group row mt-3">
-                        <label for="inputEmail3" class="col-sm-3">Year</label>
+                        <label for="inputEmail3" class="col-sm-3">Model Year</label>
                         <div class="col-sm-9">
                             <input type="text" id="ModelYear" class="form-control" />
                         </div>
@@ -524,7 +524,6 @@
             )
         }
         function POST(uri, model,beforeSend,success,error) {
-
             var options = {};
             options.url = base + uri;
             options.type = "POST";
@@ -542,6 +541,19 @@
             $.ajax(options);
         }
 
+
+        let mobileValidations = [];
+        //Lookups/SC_GetMobileValidation
+        let mobileValidationSuccess = function (result) {
+            if (!result.Success)
+                return false;
+            mobileValidations = [];
+            
+            $.each(result.Data.Result, function (i, v) {
+                mobileValidations.push(new RegExp(v.CodeData1));
+            });
+        }
+        GET('Lookups/SC_GetMobileValidation',null, mobileValidationSuccess)
         function saveMobile() {
             var mybutton = document.getElementById("edit-mobile-btn");
             $(mybutton).css("opacity", "0.5");
@@ -549,14 +561,30 @@
             $(mybutton).attr("disabled", "disabled");
             mybutton.innerHTML = "Save &nbsp;<i style='font-size:20px;' class='fa fa-spinner faa-spin animated'></i>";
 
-
+           
             var selected = $('#search-customer').select2('data')[0];
             if (!selected) {
                 showError('Please select a customer to continue.', mybutton, 'response', 'Save');
                 return false;
             }
+            let mobile1 = $('#txtEditMobile1').val();
+            let mobile2 = $('#txtEditMobile2').val();
+            console.log(mobileValidations)
+            var isMatch = mobileValidations.some(function (rx) { return rx.test(mobile2) });
+            var isMatch2 = mobileValidations.some(function (rx) { return rx.test(mobile2); });
+            if (!isMatch & mobile1 != '') {
+                showError('Please enter a valid mobile no in Mobile 1.', mybutton, 'response', 'Save');
+            }
+            if (!isMatch2 & mobile2 != '') {
+                showError('Please enter a valid mobile no in Mobile 2.', mybutton, 'response', 'Save');
+
+            }
+            showError('Success! ', mybutton, 'response', 'Save');
+
+            console.log(mobileValidations, isMatch, isMatch2);
+            return;
             let model = {
-                AccountId: selected.id, Mobile1: $('#txtEditMobile1').val(), Mobile2: $('#txtEditMobile2').val()
+                AccountId: selected.id, Mobile1: mobile1, Mobile2: mobile2
             };
             let success = function (response) {
                 if (response.Success) {
@@ -574,7 +602,7 @@
             let error = function (response) {
                 showError('Customer mobile cannot be changed. Please try again later.', mybutton, 'response', 'Save');
             }
-            POST("Appointments/SC_CustomerMobileUpdate_Appointment", JSON.stringify(model), null, success, error);
+            POST("Appointments/SC_CustomerMobileUpdate_Appointment", model, null, success, error);
         } 
         let serviceCenterCollection = [];
         let autoSearch = false;
@@ -597,7 +625,7 @@
             allowClear: true,
             minimumInputLength: 1,
             ajax: {
-                url: base + 'Customers/SC_GetCustomerInfo',
+                url: base + 'Customers/SC_GetCustomerInfo?PageSize=50',
                 headers: {
                     'Access-Control-Allow-Headers': 'Authorization',
                     'Authorization': 'Bearer ' + token
@@ -723,6 +751,7 @@
         datepicker.firstDayOfWeek = 6;
         datepicker.allowEdit = false;
         datepicker.placeholder = 'Appointment date';
+        datepicker.format = "dd/MM/yyyy hh:mm a"
         // Render initialized DatePicker.
         datepicker.appendTo('#FromDateTime')
         datepicker.renderDayCell = function (args) {
@@ -959,7 +988,7 @@
         $('#drpStatus').on('select2:select', function (e) {
             $("#drpReason").html('').select2();
             var selected = e.params.data;
-            if (selected.text == 'Cancelled' || selected.text == 'No Show') {
+            if (selected.childsId) {
                 $('#reason-container').show();
                 let successaptreason = function (result, status, xhr) {
                     let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData, childsId: v.ChildsId }; });
@@ -967,7 +996,7 @@
                         width: '100%',
                         data: data
                     });
-                    if (e.params2.selected) {
+                    if (e.params2 & e.params2.selected) {
                         $("#drpReason").val(e.params2.selected).trigger('change');
                     }
                 }
@@ -1092,7 +1121,6 @@
                     type = 'edit';
                     args.cancel = true;
                     // yyyy-mm-ddThh:mm
-
 
                     $('#dialog1').modal('show');
                 }
@@ -1358,9 +1386,7 @@
             options.success = function (response) {
                 if (response.Success) {
                     select2_search($('#search-customer'), response.Data);
-                    $('#FirstName').val('');
-                    $('#LastName').val('');
-                    $('#Mobile').val('');
+                    LoadVins(null);
                     $("#customer-response").html("<span class='alert alert-info text-info my-2 d-block'>Customer Saved successfully.</span> ");
                     setTimeout(function () {
                         $("#customer-response").html("");
@@ -1384,7 +1410,7 @@
 
         $.ajax(
             {
-                url: base + 'Lookups/SC_GetLookups?CodeType=1301',
+                url: base + 'Lookups/SC_GetLookups?PageSize=100&CodeType=1301',
                 type: "GET",
                 headers: {
                     'Access-Control-Allow-Headers': 'Authorization',
@@ -1453,13 +1479,13 @@
             $(mybutton).css("cursor", "default");
             $(mybutton).attr("disabled", "disabled");
             mybutton.innerHTML = "Save changes &nbsp;<i style='font-size:20px;' class='fa fa-spinner fa-spin animated'></i>";
-            var model1 = {};
-            model1.AccountId = parseInt($('#search-customer').val())
-            model1.VehicleNumber = $('#VehicleNo').val();
-            model1.brandId = +$('#drpBrand').val();
-            model1.modelId = +$('#drpModel').val();
-            model1.ModelYear = +$('#ModelYear').val();
-            model1.plateNumber = $('#PaletteNo').val();
+            //var model1 = {};
+            //model1.AccountId = parseInt($('#search-customer').val())
+            //model1.VehicleNumber = $('#VehicleNo').val();
+            //model1.brandId = +$('#drpBrand').val();
+            //model1.modelId = +$('#drpModel').val();
+            //model1.ModelYear = +$('#ModelYear').val();
+            //model1.plateNumber = $('#PaletteNo').val();
 
             let model = {
                 "userId": 0,
@@ -1488,7 +1514,7 @@
             if (model.vehicleNumber == '') {
                 //showError('Please enter Vehicle Number to continue.', mybutton, 'vin-response');
                 //return false;
-                model.VehicleNumber = "TempVin-" + GenerateFakeVin(9);
+                model.vehicleNumber = "TempVin-" + GenerateFakeVin(9);
             }
             if (!model.brandId) {
                 showError('Please select a Brand to continue.', mybutton, 'vin-response');

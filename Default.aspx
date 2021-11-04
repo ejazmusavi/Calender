@@ -233,12 +233,12 @@
 
                             <div class="form-group row">
                                 <div class="col">
-                                        <label for="inputEmail3" class="control-label">Appointment Source</label>
+                                        <label for="inputEmail3" class="control-label">Appointment Type</label>
                                             <select class="form-control select2" id="drpType" name="Service">
                                             </select>
                                 </div>
                                 <div class="col">
-                                        <label for="inputEmail3" class="control-label">Appointment Type</label>
+                                        <label for="inputEmail3" class="control-label">Appointment Source</label>
                                             <select class="form-control select2" id="drpSource" name="Service" >
                                             </select>
                                 </div>
@@ -444,18 +444,6 @@
                 </div>
                 <div class="modal-body ">
 
-                    <div class="form-group row mt-3">
-                        <label for="inputEmail3" class="col-sm-3">VIN</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="VehicleNo" class="form-control" />
-                        </div>
-                    </div>
-                    <div class="form-group row mt-3">
-                        <label for="inputEmail3" class="col-sm-3">Plate No</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="PaletteNo" class="form-control" />
-                        </div>
-                    </div>
                     <div class="form-group row">
                         <label for="inputEmail3" class="col-sm-3">Brand Name</label>
                         <div class="col-sm-9">
@@ -474,6 +462,18 @@
                         <label for="inputEmail3" class="col-sm-3">Model Year</label>
                         <div class="col-sm-9">
                             <input type="text" id="ModelYear" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group row mt-3">
+                        <label for="inputEmail3" class="col-sm-3">Plate No</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="PaletteNo" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group row mt-3">
+                        <label for="inputEmail3" class="col-sm-3">VIN</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="VehicleNo" class="form-control" />
                         </div>
                     </div>
                 </div>

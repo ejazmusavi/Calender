@@ -127,7 +127,12 @@
     
     <script type="application/javascript">
 
-        
+
+        var base = 'http://api.markaziasystems.com/api/v1/';
+        //base = 'http://apis.markazia.jo/api/v1/';
+        //base ='http://localhost:4500/api/v1/'
+        //base = 'http://localhost:4500/api/v1/';
+
         $('.input100').on('change', function () {
             if ($(this).val().trim() != "") {
                 $(this).addClass('has-val');
@@ -153,7 +158,7 @@ setTimeout(function () {
             mybutton.innerHTML = "Login &nbsp;<i style='font-size:20px;' class='fa fa-spinner faa-spin animated'></i>";
 
             var options = {};
-            options.url = base ="http://api.markaziasystems.com/api/v1/Accounts/login";//'http://localhost:4500/api/v1/Accounts/login'; // 
+            options.url = base +"Accounts/login";
 
             options.type = "POST";
 
@@ -167,24 +172,59 @@ setTimeout(function () {
             options.dataType = "json";
 
             options.success = function (obj) {
-                console.log(obj);
-                localStorage.setItem("token", obj.Data.Token);
-                localStorage.setItem("BusinessAreaId", obj.Data.User.BusinessAreaId);
+                //start Service Center
+                $.ajax({
+                    type: "GET",
+                    url: base + "ServiceCenters/SC_GetServiceCenters",
+                    headers: {
+                        'Access-Control-Allow-Headers': 'Authorization',
+                        'Authorization': 'Bearer ' + obj.Data.Token
+                    },
+                    dataType: 'json',
+                    success: function (result, status, xhr) {
+                        if (!result.Success) {
+                            resetBtn()
+                            $("#response").html("<h5 class='text-danger my-2' >You have no service center assigned.</h5>");
+                            return false;
+                        }
+                        if (result.Data.length == 0) {
+                            resetBtn()
+                            $("#response").html("<h5 class='text-danger my-2' >You have no service center assigned.</h5>");
+                            return false;
+                        }
 
-                $("#response").html("<h4 class='text-info my-2' >User successfully logged in.</h4> ");
-                $(location).attr("href", '/Default');
+                        localStorage.setItem("token", obj.Data.Token);
+                        localStorage.setItem("BusinessAreaId", obj.Data.User.BusinessAreaId);
+                        resetBtn()
+                        $("#response").html("<h5 class='text-info my-2' >User successfully logged in.</h5>");
+                        $(location).attr("href", '/Default');
+
+                    },
+                    error: function (xhr, status, error) {
+                        //alert(xhr);
+                        scheduleObj.hideSpinner();
+                        resetBtn()
+                        $("#response").html("<h5 class='text-danger my-2' >Error in Service Center data.</h5>");
+                    }
+                });
+                //End Service center
+
             };
             options.error = function () {
                 $("#response").html("<h4 class='text-danger my-2' >Error while trying to login!</h4> ");
-                $(mybutton).css("opacity", "1");
-                $(mybutton).css("cursor", "pointer");
-                $(mybutton).removeAttr("disabled");
-                mybutton.innerHTML = "Login";
+                resetBtn()
 
             };
             $.ajax(options);
         }
 
+        function resetBtn() {
+            var mybutton = document.getElementById("btnLogin");
+            $(mybutton).css("opacity", "1");
+            $(mybutton).css("cursor", "pointer");
+            $(mybutton).removeAttr("disabled");
+            mybutton.innerHTML = "Login";
+        }
     </script>
 
     <%--<script type="application/javascript" src="https://api.ipify.org?format=jsonp&callback=getIP"></script>--%>

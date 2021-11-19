@@ -219,7 +219,7 @@
                 <div class="modal-body">
                     <ul class="nav nav-tabs" id="myTab" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Appointment</a>
+                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"  aria-selected="true">Appointment</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Customer</a>
@@ -294,7 +294,7 @@
                                             <select id="search-customer" class="form-control select2remote">
                                             </select>
                                             <div class="input-group-append">
-                                                <span class="input-group-text"><a href="#" data-toggle="modal" data-target="#diallog-customer">Add</a></span>
+                                                <span class="input-group-text"><a href="#" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#diallog-customer">Add</a></span>
                                             </div>
                                         </div>
                                     </div>
@@ -341,10 +341,10 @@
                                             <ul class="nav" id="customer-info">
                                                 <li>Name: <span id="lblcustname"></span></li>
                                                 <li>Mobile 1: <span class="label" id="lblmobile"></span>
-                                                    <input type="text" class="edit ml-3" id="txtEditMobile1" />
+                                                    <input type="text" class="edit ml-3" id="txtEditMobile1" onkeypress="return validateMobile(event,this)"/>
                                                     <span class="fa fa-pencil float-right mr-2 edit-icon" onclick="customerEdit()"></span></li>
                                                 <li>Mobile 2: <span class="label" id="lblmobile2"></span>
-                                                    <input type="text" class="edit ml-3" id="txtEditMobile2" />
+                                                    <input type="text" class="edit ml-3" id="txtEditMobile2" onkeypress="return validateMobile(event,this)"/>
                                                     <button type="button" id="edit-mobile-btn" class="edit mr-2" onclick="saveMobile()">Save</button>
                                                     <button type="button" id="cancel-mobile" class="edit" onclick="cancelMobile()">Cancel</button>
                                                 </li>
@@ -357,7 +357,7 @@
                                                             </select>
                                                             <div class="input-group-append">
                                                                 <span class="input-group-text">
-                                                                    <a href="#" data-toggle="modal" data-target="#diallog-vin"><i class="fa fa-plus"></i>Add</a>
+                                                                    <a href="#" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#diallog-vin"><i class="fa fa-plus"></i>Add</a>
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -384,11 +384,11 @@
                     <hr />
                     <div class="w-100" id="response"></div>
                     <div class="text-right w-100">
-                        <button type="button" id="btnCloseCustomer" class="btn btn-default float-left mr-3" data-dismiss="modal">Close</button>
 
                         <button type="button" class="btn btn-danger float-left" id="btnDelete" onclick="DeleteEvent()">Delete</button>
 
                         <button type="button" class="btn btn-primary" id="btnSave" onclick="SaveChanges()">Save changes</button>
+                        <button type="button" id="btnCloseCustomer" class="btn btn-secondary  mr-3" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -416,7 +416,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="inputEmail3" class="col-sm-3">Mobile</label>
+                        <label for="inputEmail3"  onkeypress="return validateMobile(event,this,'customer-response')" class="col-sm-3">Mobile</label>
                         <div class="col-sm-9">
 
                             <input type="text" id="Mobile" class="form-control" />
@@ -504,8 +504,10 @@
             $(location).attr("href", '/Login');
         }
         var base = 'http://api.markaziasystems.com/api/v1/';
+        //base = 'http://apis.markazia.jo/api/v1/';
         //base ='http://localhost:4500/api/v1/'
-        function GET(uri,data, success,error) {
+        //base = 'http://localhost:4500/api/v1/';
+         function GET(uri,data, success,error) {
             $.ajax(
                 {
                     url: base + uri,
@@ -672,8 +674,9 @@
                 $("#drpVIN").html('').select2();
                 let sucess = function (result, status, xhr) {
                     let data3 = result.Data.Result.map(function (v) { return { id: v.VinId, text: v.VinNo + ', ' + v.PlateNo + ', ' + v.Brand + ', ' + v.ModelName }; });
-                    $("#drpVIN").select2({
-                        data: data3
+                    $("#drpVIN").html('<option value="">Select a VIN</option>').select2({
+                        data: data3,
+                        placeholder:'Select a VIN'
                     })
                     if (VINId > 0)
                         $('#drpVIN').val(VINId).trigger('change');
@@ -710,7 +713,7 @@
                         AppointmentID: v.AppointmentId,
                         Id: v.AppointmentId,
                         Notes: v.Notes,
-                        Subject: v.CustomerName,
+                        Subject: v.CustomerDesc,
                         StartTime: new Date(v.AppointmentDate),
                         EndTime: moment(new Date(v.AppointmentDate))
                             .add(v.TotalDuration, 'minutes').toDate(),
@@ -838,7 +841,6 @@
                 args.element.classList.add('e-disableCell');
             }
         }
-
         //drag to hold the last drop data to reset if ajax request failed
         let drag;
         scheduleObj.dragStart = function (e) {
@@ -950,9 +952,10 @@
         //Get Source from lookup
         let successaptsource = function (result, status, xhr) {
             let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData, childsId:v.ChildsId }; });
-            $("#drpSource").select2({
+            $("#drpSource").html('<option value="">Select a Source</option>').select2({
                 width: '100%',
-                data: data
+                data: data,
+                placeholder:'Select a Source'
             });
         }
         GET('Appointments/SC_GetAppintmentSource', null, successaptsource)
@@ -961,9 +964,10 @@
         //Get Source from lookup
         let successapttype = function (result, status, xhr) {
             let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData, childsId: v.childsId }; });
-            $("#drpType").select2({
+            $("#drpType").html('<option value="">Select a Type</option>').select2({
                 width: '100%',
-                data: data
+                data: data,
+                placeholder: 'Select a Type'
             });
         }
         GET('Appointments/SC_GetAppintmentLookupChild?LookupTypeId=100', null, successapttype)
@@ -973,9 +977,10 @@
         //Get Status from lookup
         let successaptstatus = function (result, status, xhr) {
             let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData, childsId: v.ChildsId }; });
-            $("#drpStatus").select2({
+            $("#drpStatus").html('<option value="">Select a Status</option>').select2({
                 width: '100%',
-                data: data
+                data: data,
+                placeholder: 'Select a Status'
             });
         }
         GET('Appointments/SC_GetAppintmentStatus', null, successaptstatus)
@@ -988,7 +993,7 @@
                 $('#reason-container').show();
                 let successaptreason = function (result, status, xhr) {
                     let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData, childsId: v.ChildsId }; });
-                    $("#drpReason").html('').select2({
+                    $("#drpReason").html('<option value="">Select a Reason</option>').select2({
                         width: '100%',
                         data: data
                     });
@@ -1110,7 +1115,10 @@
             if (args.type == 'QuickInfo') {
                 type = 'new';
                 args.cancel = true;
-                $('#dialog1').modal('show');
+                $('#dialog1').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                }).modal('show');
             }
             else
                 if (args.type == 'Editor') {
@@ -1118,7 +1126,10 @@
                     args.cancel = true;
                     // yyyy-mm-ddThh:mm
 
-                    $('#dialog1').modal('show');
+                    $('#dialog1').modal({
+                        backdrop: 'static',
+                        keyboard: false
+                    }).modal('show');
                 }
         }
         let startTime = new Date();
@@ -1291,6 +1302,12 @@
 
             $('#drpBrand').val('').trigger('change');
 
+            $('#drpBrand').val('').trigger('change');
+            $('#drpType').val('').trigger('change');
+            $('#drpSource').val('').trigger('change');
+            $('#drpStatus').val('').trigger('change');
+            $('#drpReason').val('').trigger('change');
+
 
             $('#drpModel').html('').select2({
                 data: [],
@@ -1427,9 +1444,10 @@
                 dataType: 'json',
                 success: function (result, status, xhr) {
                     let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData }; });
-                    $("#drpBrand").select2({
+                    $("#drpBrand").html('<option value="">Select a Brand</option>').select2({
                         width: '100%',
-                        data: data
+                        data: data,
+                        placeholder: 'Select a Brand'
                     });
                 },
                 error: function (xhr, status, error) {
@@ -1458,9 +1476,10 @@
                     dataType: 'json',
                     success: function (result, status, xhr) {
                         let data1 = result.Data.Result.map(function (v) { return { id: v.ModelId, text: v.ModelName }; });
-                        $("#drpModel").select2({
+                        $("#drpModel").html('<option value="">Select a Model</option>').select2({
                             width: '100%',
-                            data: data1
+                            data: data1,
+                            placeholder: 'Select a Model'
                         });
                     },
                     error: function (xhr, status, error) {
@@ -1579,6 +1598,89 @@
             var number = Math.floor(Math.random() * (max - min + 1)) + min;
 
             return ("" + number).substring(add);
+        }
+
+        function validateMobile(e, t, response) {
+            if (!response || response == '') {
+                response = 'response';
+            }
+            let message = '';
+            let mobile = t.value;
+
+            var start = t.selectionStart;
+            var end = t.selectionEnd;
+
+            if (mobile.length < 4) {
+
+            }
+            //else if (!mobile.startsWith('07') || !mobile.startsWith('+07') || !mobile.startsWith('9627') || !mobile.startsWith('+9627')) {
+            //    message = 'Enter a valid mobile no.';
+            //    alert('if')
+            //}
+            else {
+                let length = 0;
+
+                if (mobile.startsWith('07')) {
+                    length = 10;
+                }
+
+                else if (mobile.startsWith('+07')) {
+                    length = 11;
+                }
+                else if (mobile.startsWith('9627')) {
+                    length = 12;
+                }
+                else if (mobile.startsWith('+9627')) {
+                    length = 13;
+                }
+                else {
+                    if (start == end) {
+                        $("#" + response+"").html("<span class='alert alert-danger text-danger my-2 d-block' >Invalid mobile no</span> ");
+                        return false;
+                    }
+                }
+
+                let result = validateNo(e, t, length);
+                if (result == false) {
+                    message = 'Enter a valid mobile no.';
+                }
+            }
+            if (message == '') {
+                $("#response").html('');
+                return true;
+            } else {
+                $("#" + response + "").html("<span class='alert alert-danger text-danger my-2 d-block' >" + message + "</span> ");
+                return false;
+                //showError('Enter a valid mobile no.', null, response);
+            }
+
+        }
+
+       function validateNo(e,t,length){
+            var value = t.value;
+
+            if (window.event) {
+                var charCode = window.event.keyCode;
+            }
+            else if (e) {
+                var charCode = e.which;
+            }
+            else {
+                return true;
+            }
+
+           var start = t.selectionStart;
+           var end = t.selectionEnd;
+           
+            if (((e.keyCode >= 48 && e.keyCode <= 57))) {
+
+                if (value.length <= length - 1 || start != end)
+                    return true;
+                else return false;
+            }
+            else {
+                return false;
+            }
         }
     </script>
     </div>

@@ -416,10 +416,10 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="inputEmail3"  onkeypress="return validateMobile(event,this,'customer-response')" class="col-sm-3">Mobile</label>
+                        <label for="inputEmail3"   class="col-sm-3">Mobile</label>
                         <div class="col-sm-9">
 
-                            <input type="text" id="Mobile" class="form-control" />
+                            <input type="text" id="Mobile" onkeypress="return validateMobile(event,this,'customer-response')" class="form-control" />
                         </div>
                     </div>
 
@@ -571,12 +571,13 @@
             }
             let mobile1 = $('#txtEditMobile1').val();
             let mobile2 = $('#txtEditMobile2').val();
-            var isMatch = mobileValidations.some(function (rx) { return rx.test(mobile2) });
-            var isMatch2 = mobileValidations.some(function (rx) { return rx.test(mobile2); });
+
+            var isMatch = validateNoOnSave(mobile1);//  mobileValidations.some(function (rx) { return rx.test(mobile2) });
             if (!isMatch & mobile1 != '') {
                 showError('Please enter a valid mobile no in Mobile 1.', mybutton, 'response', 'Save');
                 return false;
             }
+            var isMatch2 = validateNoOnSave(mobile2);//  mobileValidations.some(function (rx) { return rx.test(mobile2); });
             if (!isMatch2 & mobile2 != '') {
                 showError('Please enter a valid mobile no in Mobile 2.', mybutton, 'response', 'Save');
                 return false;
@@ -591,6 +592,7 @@
                     $(mybutton).css("opacity", "1");
                     $(mybutton).css("cursor", "pointer");
                     $(mybutton).removeAttr("disabled");
+                    mybutton.innerHTML = "Save";
                     $('#customer-info').removeClass('edit')
                 }
                 else {
@@ -673,7 +675,7 @@
                 $('#txtEditMobile2').val(selected.mobile2);
                 $("#drpVIN").html('').select2();
                 let sucess = function (result, status, xhr) {
-                    let data3 = result.Data.Result.map(function (v) { return { id: v.VinId, text: v.VinNo + ', ' + v.PlateNo + ', ' + v.Brand + ', ' + v.ModelName }; });
+                    let data3 = result.Data.Result.map(function (v) { return { id: v.VinId, text: v.Brand + ', ' + v.ModelName + ', ' + v.ModelYear + ', ' + v.PlateNo + ', ' + v.VinNo }; });
                     $("#drpVIN").html('<option value="">Select a VIN</option>').select2({
                         data: data3,
                         placeholder:'Select a VIN'
@@ -1372,11 +1374,13 @@
             model.LastName = $('#LastName').val();
             model.Mobile = $('#Mobile').val();
 
-            var isMatch = mobileValidations.some(function (rx) { return rx.test(model.Mobile) });
+            var isMatch = validateNoOnSave(model.Mobile);//  mobileValidations.some(function (rx) { return rx.test(model.Mobile) });
             if (!isMatch & model.Mobile != '') {
                 showError('Please enter a valid mobile no.', mybutton, 'customer-response', 'Save');
                 return false;
             }
+
+            
             if (!model.FirstName) {
                 showError('Please enter First name to continue.', mybutton, 'customer-response');
                 return false;
@@ -1604,6 +1608,9 @@
             if (!response || response == '') {
                 response = 'response';
             }
+
+
+            $("#response").html('');
             let message = '';
             let mobile = t.value;
 
@@ -1649,14 +1656,46 @@
                 $("#response").html('');
                 return true;
             } else {
-                $("#" + response + "").html("<span class='alert alert-danger text-danger my-2 d-block' >" + message + "</span> ");
-                return false;
-                //showError('Enter a valid mobile no.', null, response);
+                let valid = validateNoOnSave(t.value);
+
+                if (!valid) {
+
+                    $("#" + response + "").html("<span class='alert alert-danger text-danger my-2 d-block' >" + message + "</span> ");
+
+                }
+                else {
+                    $("#response").html('');
+                }
+                return false;             //showError('Enter a valid mobile no.', null, response);
             }
 
         }
 
-       function validateNo(e,t,length){
+        function validateNoOnSave(mobile) {
+            let length = 0;
+
+            if (mobile.startsWith('07')) {
+                length = 10;
+            }
+
+            else if (mobile.startsWith('+07')) {
+                length = 11;
+            }
+            else if (mobile.startsWith('9627')) {
+                length = 12;
+            }
+            else if (mobile.startsWith('+9627')) {
+                length = 13;
+            }
+            else {
+                console.log('none');
+                    return false;
+            }
+            if (mobile.length <= length)
+                return true;
+            else return false;
+        }
+        function validateNo(e, t, length) {
             var value = t.value;
 
             if (window.event) {
@@ -1669,9 +1708,9 @@
                 return true;
             }
 
-           var start = t.selectionStart;
-           var end = t.selectionEnd;
-           
+            var start = t.selectionStart;
+            var end = t.selectionEnd;
+
             if (((e.keyCode >= 48 && e.keyCode <= 57))) {
 
                 if (value.length <= length - 1 || start != end)

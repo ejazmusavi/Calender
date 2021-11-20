@@ -158,7 +158,7 @@ setTimeout(function () {
             mybutton.innerHTML = "Login &nbsp;<i style='font-size:20px;' class='fa fa-spinner faa-spin animated'></i>";
 
             var options = {};
-            options.url = base +"Accounts/login";
+            options.url = base +"Accounts/NewLogin";
 
             options.type = "POST";
 
@@ -166,49 +166,29 @@ setTimeout(function () {
 
             obj.userName = $('#txtEmail').val();
             obj.password = $('#txtPassword').val();
-
+            obj.roleID = 10101;
             options.data = JSON.stringify(obj);
             options.contentType = "application/json; charset=utf8";
             options.dataType = "json";
 
             options.success = function (obj) {
-                //start Service Center
-                $.ajax({
-                    type: "GET",
-                    url: base + "ServiceCenters/SC_GetServiceCenters",
-                    headers: {
-                        'Access-Control-Allow-Headers': 'Authorization',
-                        'Authorization': 'Bearer ' + obj.Data.Token
-                    },
-                    dataType: 'json',
-                    success: function (result, status, xhr) {
-                        if (!result.Success) {
-                            resetBtn()
-                            $("#response").html("<h5 class='text-danger my-2' >You have no service center assigned.</h5>");
-                            return false;
-                        }
-                        if (result.Data.length == 0) {
-                            resetBtn()
-                            $("#response").html("<h5 class='text-danger my-2' >You have no service center assigned.</h5>");
-                            return false;
-                        }
+                
+                if (!obj.Success) {
+                    resetBtn()
+                    $("#response").html("<h5 class='text-danger my-2' >Login Failded.</h5>");
+                    return false;
+                }
+                if (result.Data.ServiceCenter.length == 0) {
+                    resetBtn()
+                    $("#response").html("<h5 class='text-danger my-2' >You have no service center assigned.</h5>");
+                    return false;
+                }
 
-                        localStorage.setItem("token", obj.Data.Token);
-                        localStorage.setItem("BusinessAreaId", obj.Data.User.BusinessAreaId);
-                        resetBtn()
-                        $("#response").html("<h5 class='text-info my-2' >User successfully logged in.</h5>");
-                        $(location).attr("href", '/Default');
-
-                    },
-                    error: function (xhr, status, error) {
-                        //alert(xhr);
-                        scheduleObj.hideSpinner();
-                        resetBtn()
-                        $("#response").html("<h5 class='text-danger my-2' >Error in Service Center data.</h5>");
-                    }
-                });
-                //End Service center
-
+                localStorage.setItem("token", obj.Data.Token);
+                localStorage.setItem("BusinessAreaId", obj.Data.User.BusinessAreaId);
+                resetBtn()
+                $("#response").html("<h5 class='text-info my-2' >User successfully logged in.</h5>");
+                $(location).attr("href", '/Default');
             };
             options.error = function () {
                 $("#response").html("<h4 class='text-danger my-2' >Error while trying to login!</h4> ");

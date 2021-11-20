@@ -504,8 +504,6 @@
             $(location).attr("href", '/Login');
         }
         var base = 'http://api.markaziasystems.com/api/v1/';
-        //base = 'http://apis.markazia.jo/api/v1/';
-        //base ='http://localhost:4500/api/v1/'
         //base = 'http://localhost:4500/api/v1/';
          function GET(uri,data, success,error) {
             $.ajax(
@@ -699,7 +697,9 @@
                 });
             }
         }
+        var prevLoading = null;
         function LoadEvents() {
+            prevLoading = null;
             scheduleObj.showSpinner();
             if (scheduleObj.eventsData.length > 0) {
                 scheduleObj.deleteEvent(scheduleObj.eventsData);
@@ -737,13 +737,17 @@
                 if (!exist)
                     scheduleObj.addEvent(e);
             }
-            //scheduleObj.hideSpinner();
+            scheduleObj.hideSpinner();
 
             }
             let error= function (xhr, status, error) {
                 scheduleObj.hideSpinner();
             }
             GET("Appointments/SC_Apt_GetCalenderAppointments", data, success, error);
+            prevLoading = setInterval(function () {
+                scheduleObj.showSpinner();
+                GET("Appointments/SC_Apt_GetCalenderAppointments", data, success, error);
+            }, 5 * 60 * 1000);
         }
 
         // initialize DatePicker component

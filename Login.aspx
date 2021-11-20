@@ -178,7 +178,7 @@ setTimeout(function () {
                     $("#response").html("<h5 class='text-danger my-2' >Login Failded.</h5>");
                     return false;
                 }
-                if (result.Data.ServiceCenter.length == 0) {
+                if (obj.Data.ServiceCenter.length == 0) {
                     resetBtn()
                     $("#response").html("<h5 class='text-danger my-2' >You have no service center assigned.</h5>");
                     return false;

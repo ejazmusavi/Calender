@@ -486,8 +486,15 @@
             </div>
         </div>
     </div>
+
     <script id="page-script">
 
+        $('#profile-tab').on('click', function () {
+            if ($('#drpType').val() == '' || $('#drpSource').val() == '' || $('#drpService').val() == '' || $('#drpStatus').val() == '') {
+                showError('Please select all fields to continue.', null, 'response', 'Save');
+                return false;
+            }
+        });
         $('.select2').select2({ width: '100%' });
         function customerEdit() {
             $('#customer-info').addClass('edit');
@@ -1254,11 +1261,12 @@
             setTimeout(function () {
                 $("#" + errorcontainer + "").html("");
             }, 5000);
-
-            $(mybutton).css("opacity", "1");
-            $(mybutton).css("cursor", "pointer");
-            $(mybutton).removeAttr("disabled");
-            mybutton.innerHTML = buttontext;
+            if (mybutton) {
+                $(mybutton).css("opacity", "1");
+                $(mybutton).css("cursor", "pointer");
+                $(mybutton).removeAttr("disabled");
+                mybutton.innerHTML = buttontext;
+            }
         }
 
         function Reset() {

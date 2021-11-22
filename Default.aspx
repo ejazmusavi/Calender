@@ -486,7 +486,7 @@
             </div>
         </div>
     </div>
-    <script>
+    <script id="page-script">
 
         $('.select2').select2({ width: '100%' });
         function customerEdit() {
@@ -674,9 +674,8 @@
                 $("#drpVIN").html('').select2();
                 let sucess = function (result, status, xhr) {
                     let data3 = result.Data.Result.map(function (v) { return { id: v.VinId, text: v.Brand + ', ' + v.ModelName + ', ' + v.ModelYear + ', ' + v.PlateNo + ', ' + v.VinNo }; });
-                    $("#drpVIN").html('<option value="">Select a VIN</option>').select2({
-                        data: data3,
-                        placeholder:'Select a VIN'
+                    $("#drpVIN").html('').select2({
+                        data: data3
                     })
                     if (VINId > 0)
                         $('#drpVIN').val(VINId).trigger('change');
@@ -958,10 +957,9 @@
         //Get Source from lookup
         let successaptsource = function (result, status, xhr) {
             let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData, childsId:v.ChildsId }; });
-            $("#drpSource").html('<option value="">Select a Source</option>').select2({
+            $("#drpSource").html('').select2({
                 width: '100%',
-                data: data,
-                placeholder:'Select a Source'
+                data: data
             });
         }
         GET('Appointments/SC_GetAppintmentSource', null, successaptsource)
@@ -970,10 +968,9 @@
         //Get Source from lookup
         let successapttype = function (result, status, xhr) {
             let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData, childsId: v.childsId }; });
-            $("#drpType").html('<option value="">Select a Type</option>').select2({
+            $("#drpType").html('').select2({
                 width: '100%',
                 data: data,
-                placeholder: 'Select a Type'
             });
         }
         GET('Appointments/SC_GetAppintmentLookupChild?LookupTypeId=100', null, successapttype)
@@ -983,10 +980,9 @@
         //Get Status from lookup
         let successaptstatus = function (result, status, xhr) {
             let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData, childsId: v.ChildsId }; });
-            $("#drpStatus").html('<option value="">Select a Status</option>').select2({
+            $("#drpStatus").html('').select2({
                 width: '100%',
-                data: data,
-                placeholder: 'Select a Status'
+                data: data
             });
         }
         GET('Appointments/SC_GetAppintmentStatus', null, successaptstatus)
@@ -999,13 +995,15 @@
                 $('#reason-container').show();
                 let successaptreason = function (result, status, xhr) {
                     let data = result.Data.Result.map(function (v) { return { id: v.CodeId, text: v.CodeData, childsId: v.ChildsId }; });
-                    $("#drpReason").html('<option value="">Select a Reason</option>').select2({
+                    $("#drpReason").html('').select2({
                         width: '100%',
                         data: data
                     });
-                    if (e.params2 & e.params2.selected) {
-                        $("#drpReason").val(e.params2.selected).trigger('change');
-                    }
+                    try {
+                        if (e.params2 & e.params2.selected) {
+                            $("#drpReason").val(e.params2.selected).trigger('change');
+                        }
+                    } catch { }
                 }
                 GET('Appointments/SC_GetAppintmentLookupChild?LookupTypeId=' + selected.childsId, null, successaptreason)
             }
@@ -1308,12 +1306,20 @@
 
             $('#drpBrand').val('').trigger('change');
 
-            $('#drpBrand').val('').trigger('change');
-            $('#drpType').val('').trigger('change');
-            $('#drpSource').val('').trigger('change');
-            $('#drpStatus').val('').trigger('change');
-            $('#drpReason').val('').trigger('change');
+            $('#drpType').val($("#drpType option:nth-child(1)").val()).trigger('change')
+            $('#drpSource').val($("#drpSource option:nth-child(1)").val()).trigger('change');
+            $('#drpStatus').val($("#drpStatus option:nth-child(1)").val()).trigger('change');
+            $('#drpReason').val($("#drpReason option:nth-child(1)").val()).trigger('change');
 
+            $('#drpStatus').trigger({
+                type: 'select2:select',
+                params2: {
+                    selected: null
+                },
+                params: {
+                    data: $('#drpStatus').select2('data')[0]
+                }
+            });
 
             $('#drpModel').html('').select2({
                 data: [],
